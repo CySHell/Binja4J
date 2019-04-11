@@ -28,21 +28,19 @@ class Neo4jVar:
             'mandatory_node_dict': {
                 'HASH': self.HASH,
                 'UUID': self.UUID,
-                'SourceVarType': self.source_variable_type.value,
-                'Type': self.type,
                 'LABEL': 'Variable',
             },
             'mandatory_relationship_dict': {
                 'START_ID': self.parent_expr,
-                'OperandIndex': self.operand_index,
                 'END_ID': self.UUID,
-                'TYPE': 'Operand',
+                'TYPE': 'VarOperand',
             },
             'node_attributes': {
-
+                'SourceVarType': self.source_variable_type.value,
+                'Type': self.type,
             },
             'relationship_attributes': {
-
+                'OperandIndex': self.operand_index,
             },
         }
 

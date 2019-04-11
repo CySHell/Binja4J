@@ -42,8 +42,6 @@ class Neo4jFunction:
             },
             'mandatory_relationship_dict': {
                 'START_ID': self.bv_uuid,
-                'Offset': self.source_function.start,
-                'CallerFunc': caller_func,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
             },
@@ -51,7 +49,8 @@ class Neo4jFunction:
 
             },
             'relationship_attributes': {
-
+                'Offset': self.source_function.start,
+                'CallerFunc': caller_func,
             },
         }
         return csv_template

@@ -42,9 +42,14 @@ class BinjaGraph:
         if success:
             current_bb = bb_control_flow_graph.pop()
             while current_bb:
-                bb_control_flow_graph.append(self.bb_extract(current_bb[0], current_bb[1], current_bb[2],
+                bb_control_flow_graph.extend(self.bb_extract(current_bb[0], current_bb[1], current_bb[2],
                                              current_bb[3]))
-                current_bb = bb_control_flow_graph.pop() if bb_control_flow_graph else False
+                if bb_control_flow_graph:
+                    current_bb = bb_control_flow_graph.pop()
+                else:
+                    current_bb = False
+
+                print(current_bb)
 
     def bb_extract(self, basic_block, parent_func_uuid, parent_bb_uuid, branch_condition):
         bb_object = BasicBlock.Neo4jBasicBlock(basic_block, self._uuid_obj.get_uuid(),
@@ -72,7 +77,7 @@ class BinjaGraph:
 
         for branch in basic_block.outgoing_edges:
             if not branch.back_edge:
-                outgoing_edges_list.extend((branch.target, parent_func_uuid, bb_object.UUID, branch.type.value))
+                outgoing_edges_list.append([branch.target, parent_func_uuid, bb_object.UUID, branch.type.value])
 
         return outgoing_edges_list
 

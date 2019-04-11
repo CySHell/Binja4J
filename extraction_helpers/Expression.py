@@ -25,26 +25,25 @@ class Neo4jExpression:
         return expr_hash.intdigest()
 
     def serialize(self):
+
         csv_template = {
             'mandatory_node_dict': {
                 'UUID': self.UUID,
                 'HASH': self.HASH,
-                'Operands': self.operands,
-                'OperationName': self.op_name,
-                'OperationType': self.op_type,
                 'LABEL': 'Expression',
             },
             'mandatory_relationship_dict': {
                 'START_ID': self.parent_instruction,
-                'OperandIndex': self.operand_index,
                 'END_ID': self.UUID,
                 'TYPE': 'Operand',
             },
             'node_attributes': {
-
+                'Operands': self.operands,
+                'OperationName': self.op_name,
+                'OperationType': self.op_type,
             },
             'relationship_attributes': {
-
+                'OperandIndex': self.operand_index,
             },
         }
 

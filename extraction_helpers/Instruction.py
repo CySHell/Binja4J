@@ -28,21 +28,19 @@ class Neo4jInstruction:
             'mandatory_node_dict': {
                 'UUID': self.UUID,
                 'HASH': self.HASH,
-                'Operands': self.operands,
                 'LABEL': 'Instruction',
             },
             'mandatory_relationship_dict': {
                 'START_ID': self.parent_instruction,
-                'InstructionIndex': self.instr.instr_index,
-                'ParentBB': self.parent_bb,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
             },
             'node_attributes': {
-
+                'Operands': self.operands,
             },
             'relationship_attributes': {
-
+                'InstructionIndex': self.instr.instr_index,
+                'ParentBB': self.parent_bb,
             },
         }
         return csv_template

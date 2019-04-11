@@ -7,8 +7,7 @@ uri = "bolt://localhost:7687"
 user = "neo4j"
 password = "user"
 
-path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-e9d7bcc0-ef2d-413b-9bd1-a9611b47bc06\\installation-3.5.4\\\import\\'
-
+path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-0ef92336-28be-4d3a-9a5b-bfd5d8466801\\installation-3.5.4\\\import\\'
 
 class MergeNeo4j:
 
@@ -65,9 +64,9 @@ class MergeNeo4j:
                         "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
                         "UNWIND keys(row) as key "
                         "UNWIND row[key] as val "
-                        "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, {}) yield node "
-                        "WITH node as new_node, key, val "
-                        "CALL apoc.create.setProperty([new_node], key, val) yield node "
+                        "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
+                        #"WITH node as new_node, key, val "
+                        #"CALL apoc.create.setProperty([new_node], key, val) yield node "
                         "RETURN node.UUID "
                         )
 
@@ -78,12 +77,12 @@ class MergeNeo4j:
             print('Now Processing: ', filename)
             session.run("USING PERIODIC COMMIT 1000 "
                         "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
-                        "UNWIND keys(row) as key "
-                        "UNWIND row[key] as val "
-                        "MATCH (start {UUID: row['START_ID']}), (end {UUID: row['END_ID']}) "
-                        "CALL apoc.merge.relationship(start, row['TYPE'], {}, {}, end) yield rel "
-                        "WITH rel as new_rel, key, val "
-                        "CALL apoc.create.setRelProperty([new_rel], key, val) yield rel "
+                        "MATCH (start {UUID: row['START_ID']}) "
+                        "MATCH (end {UUID: row['END_ID']}) "
+                        "CALL apoc.merge.relationship(start, row['TYPE'], "
+                                                    "{START_ID: row['START_ID'], "
+                                                     "END_ID: row['END_ID']}, "
+                                                     "row, end) yield rel "
                         "RETURN rel.ID "
                         )
 

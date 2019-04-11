@@ -47,8 +47,6 @@ class Neo4jBinaryView:
             'mandatory_node_dict': {
                 'UUID': self.UUID,
                 'HASH': self.HASH,
-                'FILENAME': self.FILENAME,
-                'Architecture': self.bv.arch.name,
                 'LABEL': 'BinaryView',
                 },
             'mandatory_relationship_dict': {
@@ -57,7 +55,8 @@ class Neo4jBinaryView:
                 'TYPE': 'MemberBV',
             },
             'node_attributes': {
-
+                'FILENAME': self.FILENAME,
+                'Architecture': self.bv.arch.name,
             },
             'relationship_attributes': {
 

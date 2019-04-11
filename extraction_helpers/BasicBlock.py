@@ -48,19 +48,16 @@ class Neo4jBasicBlock:
             },
             'mandatory_relationship_dict': {
                 'START_ID': self.parent_bb,
-                'bb_offset': self.bb.start,
-                'ParentFunction': self.parent_func_uuid,
                 'BranchCondition': self.branch_condition_enum,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
             },
             'node_attributes': {
                 'node_test': 'node1',
-                'test_node': 'node2',
             },
             'relationship_attributes': {
-                'relationship_test': 'relationship1',
-                'test_relationship': 'relationship2',
+                'bb_offset': self.bb.start,
+                'ParentFunction': self.parent_func_uuid,
             },
         }
 
