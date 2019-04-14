@@ -3,6 +3,8 @@
 This project aims to leverage both the static analysis capabilities of the Binary Ninja platform and the Graph DB capabilities of Neo4j.
 The combination of these powerful tools will hopefully allow for sophisticated and efficient program analysis algorithms to be developed.
 
+Please note that only MEDIUM LEVEL IL (MLIL) exporting is supported, not raw assembly.
+
   REQUIREMENTS:
   - Neo4j database
     * Install Neo4j Desktop: https://neo4j.com/docs/operations-manual/current/installation/neo4j-desktop/index.html
