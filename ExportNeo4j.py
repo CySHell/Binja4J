@@ -65,8 +65,6 @@ class MergeNeo4j:
                         "UNWIND keys(row) as key "
                         "UNWIND row[key] as val "
                         "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
-                        #"WITH node as new_node, key, val "
-                        #"CALL apoc.create.setProperty([new_node], key, val) yield node "
                         "RETURN node.UUID "
                         )
 

@@ -19,7 +19,7 @@ class Neo4jVar:
 
     def var_hash(self):
         var_hash = xxhash.xxh32()
-        var_hash.update(str(self.type) + str(self.source_variable_type))
+        var_hash.update(self.var.name)
 
         return var_hash.intdigest()
 
@@ -36,8 +36,9 @@ class Neo4jVar:
                 'TYPE': 'VarOperand',
             },
             'node_attributes': {
-                'SourceVarType': self.source_variable_type.value,
+                'SourceVarType': self.source_variable_type.name,
                 'Type': self.type,
+                'Name': self.var.name
             },
             'relationship_attributes': {
                 'OperandIndex': self.operand_index,

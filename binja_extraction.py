@@ -19,6 +19,7 @@ class BinjaGraph:
         self.basic_block_cache = dict()
         self.instruction_cache = dict()
         self.expression_cache = dict()
+        self.var_cache = dict()
 
     def bv_extract(self):
         """
@@ -43,13 +44,11 @@ class BinjaGraph:
             current_bb = bb_control_flow_graph.pop()
             while current_bb:
                 bb_control_flow_graph.extend(self.bb_extract(current_bb[0], current_bb[1], current_bb[2],
-                                             current_bb[3]))
+                                                             current_bb[3]))
                 if bb_control_flow_graph:
                     current_bb = bb_control_flow_graph.pop()
                 else:
                     current_bb = False
-
-                print(current_bb)
 
     def bb_extract(self, basic_block, parent_func_uuid, parent_bb_uuid, branch_condition):
         bb_object = BasicBlock.Neo4jBasicBlock(basic_block, self._uuid_obj.get_uuid(),
@@ -134,21 +133,19 @@ class BinjaGraph:
                         index += 1
                         continue
                     if op_description_type == 'var':
-                        var_object = Var.Neo4jVar(instruction.operands[index], self._uuid_obj.get_uuid(),
-                                                  index, expr_object.UUID)
-                        self.CSV_serializer.serialize_object(var_object.serialize())
+                        self.extract_var(instruction.operands[index], self._uuid_obj.get_uuid(),
+                                         index, expr_object.UUID)
                         index += 1
                         continue
                     if op_description_type == 'expr_list':
-                        for il_instruction in instruction.operands[index]:
-                            self.expression_extract(il_instruction, expr_object.UUID,
-                                                    index)
+                        # TODO: support this op type - it is a list of parameters for the given expression
                         index += 1
                         continue
                     if op_description_type == 'var_list':
+                        var_index = 0
                         for il_variable in instruction.operands[index]:
-                            var_object = Var.Neo4jVar(il_variable, self._uuid_obj.get_uuid(), index, expr_object.UUID)
-                            self.CSV_serializer.serialize_object(var_object.serialize())
+                            self.extract_var(il_variable, self._uuid_obj.get_uuid(), var_index, expr_object.UUID)
+                            var_index += 1
                         index += 1
                         continue
                     if op_description_type == 'int':
@@ -182,3 +179,18 @@ class BinjaGraph:
                 success = self.CSV_serializer.serialize_object(expr_object.serialize())
 
             return success
+
+    def extract_var(self, var, uuid, index, parent_expr_uuid):
+
+        var_object = Var.Neo4jVar(var, uuid, index, parent_expr_uuid)
+        hash_exists = self.var_cache.get(var_object.HASH)
+
+        if not hash_exists:
+            success = self.CSV_serializer.serialize_object(var_object.serialize())
+            if success:
+                self.var_cache.update({var_object.HASH: var_object.UUID})
+
+        else:
+            var_object = Var.Neo4jVar(var, hash_exists,
+                                      index, parent_expr_uuid)
+            self.CSV_serializer.serialize_object(var_object.serialize())

@@ -64,7 +64,6 @@ class CSV_Serialize:
 
     def close_file_handles(self):
         for file in self.types.values():
-            print("closing: ", file)
             file.close()
 
     
