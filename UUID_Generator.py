@@ -27,7 +27,7 @@ class UUID:
     _lock = threading.Lock()
     _modulu_helper = 0
 
-    def __init__(self, driver, chunk_size=600):
+    def __init__(self, driver, chunk_size=5000):
         """
         :param driver: (Neo4j_Bolt_Driver) connector to the relevant DB
         """
