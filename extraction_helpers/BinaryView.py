@@ -53,6 +53,9 @@ class Neo4jBinaryView:
                 'START_ID': 0,
                 'END_ID': self.UUID,
                 'TYPE': 'MemberBV',
+                'NodeLabel': 'BinaryView',
+                'StartNodeLabel': 'MemberBV',
+                'EndNodeLabel': 'MemberBV',
             },
             'node_attributes': {
                 'FILENAME': self.FILENAME,

@@ -34,6 +34,8 @@ class Neo4jInstruction:
                 'START_ID': self.parent_instruction,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
+                'StartNodeLabel': 'BasicBlock' if self.relationship_label is 'InstructionChain' else 'Instruction',
+                'EndNodeLabel': 'Instruction',
             },
             'node_attributes': {
                 'Operands': self.operands,

@@ -36,6 +36,8 @@ class Neo4jExpression:
                 'START_ID': self.parent_instruction,
                 'END_ID': self.UUID,
                 'TYPE': 'Operand',
+                'StartNodeLabel': 'Instruction',
+                'EndNodeLabel': 'Expression',
             },
             'node_attributes': {
                 'Operands': self.operands,

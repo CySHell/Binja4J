@@ -2,12 +2,16 @@ from neo4j import GraphDatabase, exceptions
 import os
 import threading, multiprocessing
 import csv
+import time
+
+THREAD_COUNT = 16
+BATCH_SIZE = 10
 
 uri = "bolt://localhost:7687"
 user = "neo4j"
 password = "user"
 
-path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-56ba8de5-3d81-47fc-8c2e-279758ca709a\\installation-3.5.4\\\import\\'
+path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-924d535e-f415-4824-8c6d-653b2e50f04d\\installation-3.5.4\\\import\\'
 
 driver = GraphDatabase.driver(uri, auth=(user, password))
 
@@ -29,7 +33,6 @@ def create_constraints():
         session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.HASH IS UNIQUE;")
         session.run("CREATE INDEX ON :Constant(UUID);")
 
-
 def create_nodes(filename):
     with driver.session() as session:
         filename = '\'file:/' + filename + '\' '
@@ -43,74 +46,53 @@ def create_nodes(filename):
 
 def create_relationships(filename):
     with driver.session() as session:
-        #filename = '\'file:/' + filename + '\' '
+        # filename = '\'file:/' + filename + '\' '
+
         print('Now Processing: ', filename)
-        #session.run("USING PERIODIC COMMIT 1000 "
-        #            "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
-        #                                                       "MATCH (start {UUID: row['START_ID']}) "
-        #                                                       "MATCH (end {UUID: row['END_ID']}) "
-        #                                                       "CALL apoc.create.relationship(start, row['TYPE'], "
-        #                                                       "row, end) yield rel "
-        #                                                       "RETURN true"
-        #            )
-        batch_rows = []
-        counter = 0
+        batch_rows = [[] for _ in range(THREAD_COUNT)]
+        batch_index = 0
         thread_list = []
         with open(path + filename, 'r') as fn:
             for row in csv.DictReader(fn):
-                batch_rows.append(row)
-                counter += 1
-                if counter == 100:
-                    thread_list.append(threading.Thread(target=test_create_relationship, args=[batch_rows]))
+                batch_rows[batch_index].append(row)
+                if len(batch_rows[batch_index]) == BATCH_SIZE:
+                    thread_list.append(
+                        threading.Thread(target=test_create_relationship, args=[batch_rows[batch_index]]))
                     thread_list[-1].start()
-                    counter = 0
-                    batch_rows = []
-                if len(thread_list) > 16:
-                    thread_list[0].join()
-            if counter is not 0:
-                thread_list.append(threading.Thread(target=test_create_relationship, args=[batch_rows]))
-                thread_list[-1].start()
+                    batch_rows[batch_index] = []
+                batch_index = (batch_index + 1) % THREAD_COUNT
+                if len(thread_list) > THREAD_COUNT:
+                    thread_list[-1].join()
+
+            for batch in batch_rows:
+                if len(batch) > 0:
+                    thread_list.append(threading.Thread(target=test_create_relationship, args=[batch]))
+                    thread_list[-1].start()
+
             for thread in thread_list:
                 thread.join()
 
+
 def test_create_relationship(batch_rows):
     with driver.session() as session:
-        with session.begin_transaction() as tx:
-            #for row in batch_rows:
-            retry = False
-            while not retry:
-                try:
-                    #print(batch_rows[0])
-                    res = tx.run("UNWIND $rows as row "
-                           "MATCH (start {UUID: row['START_ID']}) "
-                           "MATCH (end {UUID: row['END_ID']}) "
-                           "CALL apoc.create.relationship(start, row['TYPE'],"
-                           "row, end) yield rel "
-                           "RETURN row", rows=batch_rows)
-                    retry = False
-                    print(res.peek())
-                except exceptions.TransientError:
-                    retry = True
-
-
-def parallel_test(filename):
-    print("processing: ", filename)
-    with driver.session() as session:
-        filename = '\'file:/' + filename + '\' '
-        first_query = "\"LOAD CSV WITH HEADERS FROM " + filename + " AS row " \
-                      "MATCH (start {UUID: row['START_ID']}) " \
-                      "MATCH (end {UUID: row['END_ID']}) " \
-                      "RETURN start, end, row \""    \
-
-        second_query = "\"CALL apoc.merge.relationship(start, row['TYPE'],"  \
-                       "{START_ID: row['START_ID'], END_ID: row['END_ID']}, row, end) yield rel " \
-                       "RETURN True\""
-
-        session.run("CALL apoc.periodic.iterate(" + first_query + ", " + second_query + ","
-                                                "{BatchSize: 100, parallel: true, iterateList: true})")
+        retry = False
+        while not retry:
+            try:
+                session.run("UNWIND $row as row "
+                            "WITH row as row "
+                            "MATCH (start:" + batch_rows[0]['StartNodeLabel'] + " {UUID: row.START_ID}) "
+                            "MATCH (end:" + batch_rows[0]['EndNodeLabel'] + " {UUID: row.END_ID}) "
+                            "CALL apoc.create.relationship(start, row.TYPE,"
+                            "row, end) yield rel "
+                            "RETURN true", row=batch_rows)
+                break
+            except exceptions.TransientError:
+                retry = True
+                time.sleep(2)
 
 
 if __name__ == "__main__":
+    start_time = time.time()
     create_constraints()
     with multiprocessing.Pool(processes=10) as pool:
         for root, dirs, files in os.walk(path):
@@ -121,3 +103,5 @@ if __name__ == "__main__":
             for filename in files:
                 if filename.endswith('-relationships.csv'):
                     pool.map(create_relationships, [filename])
+    end_time = time.time()
+    print("Operation done in ", end_time-start_time, " seconds")

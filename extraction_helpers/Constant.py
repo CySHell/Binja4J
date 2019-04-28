@@ -32,6 +32,8 @@ class Neo4jConstant:
                 'START_ID': self.parent_expr,
                 'END_ID': self.UUID,
                 'TYPE': 'ConstantOperand',
+                'StartNodeLabel': 'Expression',
+                'EndNodeLabel': 'Constant',
             },
             'node_attributes': {
                 'ConstType': type(self.constant)

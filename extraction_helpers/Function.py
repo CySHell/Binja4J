@@ -44,6 +44,8 @@ class Neo4jFunction:
                 'START_ID': self.bv_uuid,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
+                'StartNodeLabel': 'BinaryView' if self.relationship_label is 'MemberFunc' else 'Function',
+                'EndNodeLabel': 'Function',
             },
             'node_attributes': {
 

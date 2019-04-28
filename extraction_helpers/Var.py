@@ -34,6 +34,8 @@ class Neo4jVar:
                 'START_ID': self.parent_expr,
                 'END_ID': self.UUID,
                 'TYPE': 'VarOperand',
+                'StartNodeLabel': 'Expression',
+                'EndNodeLabel': 'Variable',
             },
             'node_attributes': {
                 'SourceVarType': self.source_variable_type.name,

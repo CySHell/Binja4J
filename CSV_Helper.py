@@ -1,7 +1,7 @@
 import csv
 
 path2 = 'C:\\Users\\user\\Downloads\\'
-path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-56ba8de5-3d81-47fc-8c2e-279758ca709a\\installation-3.5.4\\\import\\'
+path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-924d535e-f415-4824-8c6d-653b2e50f04d\\installation-3.5.4\\\import\\'
 
 
 class CSV_Serialize:

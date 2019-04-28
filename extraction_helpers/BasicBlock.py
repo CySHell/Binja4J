@@ -54,7 +54,9 @@ class Neo4jBasicBlock:
                 'BranchCondition': self.branch_condition_enum,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
-                'REL_HASH': self.RELATIONSHIP_HASH
+                'REL_HASH': self.RELATIONSHIP_HASH,
+                'StartNodeLabel': 'Function' if self.relationship_label is 'MemberBB' else 'BasicBlock',
+                'EndNodeLabel': 'BasicBlock'
             },
             'node_attributes': {
             },
