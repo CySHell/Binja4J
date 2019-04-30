@@ -8,13 +8,13 @@ import xxhash
 
 class Neo4jVar:
 
-    def __init__(self, var, uuid, operand_index: int, parent_expr: int):
+    def __init__(self, var, uuid, operand_index: int, parent_expr_uuid: str):
         self.UUID = uuid
         self.var = var
         self.source_variable_type = var.source_type
         self.type = str(var.type.tokens).strip('[').strip(']').replace(',', '').replace("'", '') if var.type else None
         self.operand_index = operand_index
-        self.parent_expr = parent_expr
+        self.parent_expr = parent_expr_uuid
         self.HASH = self.var_hash()
 
     def var_hash(self):

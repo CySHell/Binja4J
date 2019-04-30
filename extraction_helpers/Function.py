@@ -5,15 +5,10 @@ import xxhash
 #                                       MLIL FUNCTION                                                          #
 ################################################################################################################
 
-"""
-UUID - _uuid of the node
-HASH - xxhash of the full file assembly, NOT MLIL
-"""
-
 
 class Neo4jFunction:
 
-    def __init__(self, mlil_func, uuid: int, relationship_label: str, bv_uuid: int):
+    def __init__(self, mlil_func, uuid: str, relationship_label: str, bv_uuid: str):
         self.UUID = uuid
         self.func = mlil_func
         self.source_function = self.func.source_function

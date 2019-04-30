@@ -1,7 +1,5 @@
 import csv
-
-path2 = 'C:\\Users\\user\\Downloads\\'
-path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-924d535e-f415-4824-8c6d-653b2e50f04d\\installation-3.5.4\\\import\\'
+from . import Configuration
 
 
 class CSV_Serialize:
@@ -9,27 +7,40 @@ class CSV_Serialize:
     def __init__(self):
 
         self.types = {
-            'BinaryView': open(path + 'BinaryView-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Function': open(path + 'Functions-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'BasicBlock': open(path + 'BasicBlocks-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Instruction': open(path + 'Instructions-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Expression': open(path + 'Expressions-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Variable': open(path + 'Vars-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'MemberFunc': open(path + 'MemberFunc-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Calls': open(path + 'Calls-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'MemberBB': open(path + 'MemberBB-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Branch': open(path + 'Branch-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'InstructionChain': open(path + 'InstructionChain-relationships.csv', 'w', buffering=1, encoding='utf-8',
-                                     newline=''),
-            'NextInstruction': open(path + 'NextInstruction-relationships.csv', 'w', buffering=1, encoding='utf-8',
-                                    newline=''),
-            'BreakDown': open(path + 'BreakDown-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'Operand': open(path + 'Operand-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'VarOperand': open(path + 'VarOperand-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'MemberBV': open(path + 'MemberBV-relationships.csv', 'w', buffering=1, encoding='utf-8', newline=''),
-            'ConstantOperand': open(path + 'ConstantOperand-relationships.csv', 'w', buffering=1, encoding='utf-8',
-                                    newline=''),
-            'Constant': open(path + 'Constant-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
+            'BinaryView': open(Configuration.path + 'BinaryView-nodes.csv', 'w', buffering=1, encoding='utf-8',
+                               newline=''),
+            'Function': open(Configuration.path + 'Functions-nodes.csv', 'w', buffering=1, encoding='utf-8',
+                             newline=''),
+            'BasicBlock': open(Configuration.path + 'BasicBlocks-nodes.csv', 'w', buffering=1, encoding='utf-8',
+                               newline=''),
+            'Instruction': open(Configuration.path + 'Instructions-nodes.csv', 'w', buffering=1, encoding='utf-8',
+                                newline=''),
+            'Expression': open(Configuration.path + 'Expressions-nodes.csv', 'w', buffering=1, encoding='utf-8',
+                               newline=''),
+            'Variable': open(Configuration.path + 'Vars-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
+            'MemberFunc': open(Configuration.path + 'MemberFunc-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                               newline=''),
+            'Calls': open(Configuration.path + 'Calls-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                          newline=''),
+            'MemberBB': open(Configuration.path + 'MemberBB-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                             newline=''),
+            'Branch': open(Configuration.path + 'Branch-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                           newline=''),
+            'InstructionChain': open(Configuration.path + 'InstructionChain-relationships.csv', 'w', buffering=1,
+                                     encoding='utf-8', newline=''),
+            'NextInstruction': open(Configuration.path + 'NextInstruction-relationships.csv', 'w', buffering=1,
+                                    encoding='utf-8', newline=''),
+            'BreakDown': open(Configuration.path + 'BreakDown-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                              newline=''),
+            'Operand': open(Configuration.path + 'Operand-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                            newline=''),
+            'VarOperand': open(Configuration.path + 'VarOperand-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                               newline=''),
+            'MemberBV': open(Configuration.path + 'MemberBV-relationships.csv', 'w', buffering=1, encoding='utf-8',
+                             newline=''),
+            'ConstantOperand': open(Configuration.path + 'ConstantOperand-relationships.csv', 'w', buffering=1,
+                                    encoding='utf-8', newline=''),
+            'Constant': open(Configuration.path + 'Constant-nodes.csv', 'w', buffering=1, encoding='utf-8', newline=''),
         }
 
     def serialize_object(self, csv_template: dict, write_node=True, write_relationship=True):
@@ -62,10 +73,6 @@ class CSV_Serialize:
             print("ERROR! writing to CSV failed on object: ", csv_template)
             return False
         return True
-
-    def cleanup_csv(self):
-        # TODO: implement this
-        pass
 
     def close_file_handles(self):
         for file in self.types.values():

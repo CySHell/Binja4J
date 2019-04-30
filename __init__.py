@@ -7,15 +7,13 @@ import time
 from binaryninja import *
 from . import binja_extraction
 from . import UUID_Generator
+from . import Configuration
+
 
 def main(bv):
     start_time = time.time()
 
-    uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "user"
-
-    driver = GraphDatabase.driver(uri, auth=(user, password))
+    driver = GraphDatabase.driver(Configuration.uri, auth=(Configuration.user, Configuration.password))
 
     uuid_obj = UUID_Generator.UUID(driver)
 
@@ -24,6 +22,7 @@ def main(bv):
     binja_graph.bv_extract()
 
     end_time = time.time()
-    print("Operation done in ", end_time-start_time, " seconds")
+    print("Operation done in ", end_time - start_time, " seconds")
+
 
 PluginCommand.register("Binja4j", "Export a BinaryView to Neo4j", main)

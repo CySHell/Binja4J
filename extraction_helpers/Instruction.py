@@ -8,14 +8,14 @@ import xxhash
 
 class Neo4jInstruction:
 
-    def __init__(self, instr, uuid: int, relationship_label: str, parent_bb:int, parent_instruction: int):
+    def __init__(self, instr, uuid: int, relationship_label: str, parent_bb_uuid: str, parent_instruction_uuid: str):
         self.UUID = uuid
         self.instr = instr
         self.HASH = self.instr_hash()
         self.operands = str(instr.operands)
         self.relationship_label = relationship_label
-        self.parent_bb = parent_bb
-        self.parent_instruction = parent_instruction
+        self.parent_bb_uuid = parent_bb_uuid
+        self.parent_instruction_uuid = parent_instruction_uuid
 
     def instr_hash(self):
         instruction_hash = xxhash.xxh32()
@@ -31,7 +31,7 @@ class Neo4jInstruction:
                 'LABEL': 'Instruction',
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.parent_instruction,
+                'START_ID': self.parent_instruction_uuid,
                 'END_ID': self.UUID,
                 'TYPE': self.relationship_label,
                 'StartNodeLabel': 'BasicBlock' if self.relationship_label is 'InstructionChain' else 'Instruction',
@@ -42,7 +42,7 @@ class Neo4jInstruction:
             },
             'relationship_attributes': {
                 'InstructionIndex': self.instr.instr_index,
-                'ParentBB': self.parent_bb,
+                'ParentBB': self.parent_bb_uuid,
             },
         }
         return csv_template
