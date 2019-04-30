@@ -124,7 +124,7 @@ class BinjaGraph:
             success = self.CSV_serializer.serialize_object(instr_object.serialize())
             if success:
                 self.instruction_cache.update({instr_object.HASH: instr_object.UUID})
-                self.expression_extract(instruction, instr_object.UUID, 0)
+                self.expression_extract(instruction, instr_object.UUID, 0, parent_node_type='Instruction')
         else:
             instr_object = Instruction.Neo4jInstruction(instruction, hash_exists, relationship_label,
                                                         parent_bb_uuid, parent_instruction_uuid)
@@ -132,9 +132,9 @@ class BinjaGraph:
 
         return instr_object.UUID
 
-    def expression_extract(self, instruction, parent_instruction_uuid, operand_index):
+    def expression_extract(self, instruction, parent_instruction_uuid, operand_index, parent_node_type='Expression'):
         expr_object = Expression.Neo4jExpression(instruction.operands, self._uuid_obj.get_uuid(),
-                                                 parent_instruction_uuid,
+                                                 parent_instruction_uuid, parent_node_type,
                                                  instruction.operation.name,
                                                  str(instruction.ILOperations[instruction.operation]),
                                                  operand_index)
@@ -177,33 +177,39 @@ class BinjaGraph:
                         index += 1
                         continue
                     if op_description_type == 'int_list':
+                        # TODO: implement this
                         index += 1
                         continue
                     if op_description_type == 'float':
+                        # TODO: implement this
                         index += 1
                         continue
                     if op_description_type == 'var_ssa':
+                        # TODO: implement this
                         index += 1
                         continue
                     if op_description_type == 'var_ssa_dest_and_src':
+                        # TODO: implement this
                         index += 1
                         continue
                     if op_description_type == 'var_ssa_list':
+                        # TODO: implement this
                         index += 1
                         continue
                     if op_description_type == 'intrinsic':
+                        # TODO: implement this
                         index += 1
                         continue
                     index += 1
-            else:
-                expr_object = Expression.Neo4jExpression(instruction.operands, hash_exists,
-                                                         parent_instruction_uuid,
-                                                         instruction.operation.name,
-                                                         str(instruction.ILOperations[instruction.operation]),
-                                                         operand_index)
-                success = self.CSV_serializer.serialize_object(expr_object.serialize())
+        else:
+            expr_object = Expression.Neo4jExpression(instruction.operands, hash_exists,
+                                                     parent_instruction_uuid, parent_node_type,
+                                                     instruction.operation.name,
+                                                     str(instruction.ILOperations[instruction.operation]),
+                                                     operand_index)
+            success = self.CSV_serializer.serialize_object(expr_object.serialize())
 
-            return success
+        return success
 
     def var_extract(self, var, uuid, index, parent_expr_uuid):
         var_object = Var.Neo4jVar(var, uuid, index, parent_expr_uuid)

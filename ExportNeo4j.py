@@ -4,8 +4,9 @@ import threading, multiprocessing
 import csv
 import time
 
-THREAD_COUNT = 16
-BATCH_SIZE = 10
+THREAD_COUNT = 32
+BATCH_SIZE = 50
+RETRIES = 5
 
 uri = "bolt://localhost:7687"
 user = "neo4j"
@@ -75,8 +76,8 @@ def create_relationships(filename):
 
 def test_create_relationship(batch_rows):
     with driver.session() as session:
-        retry = False
-        while not retry:
+        retry = 0
+        while retry < RETRIES:
             try:
                 session.run("UNWIND $row as row "
                             "WITH row as row "
@@ -87,8 +88,8 @@ def test_create_relationship(batch_rows):
                             "RETURN true", row=batch_rows)
                 break
             except exceptions.TransientError:
-                retry = True
-                time.sleep(2)
+                retry += 1
+                continue
 
 
 if __name__ == "__main__":
@@ -98,10 +99,12 @@ if __name__ == "__main__":
         for root, dirs, files in os.walk(path):
             for filename in files:
                 if filename.endswith('-nodes.csv'):
-                    pool.map(create_nodes, [filename])
+                    #pool.map(create_nodes, [filename])
+                    create_nodes(filename)
         for root, dirs, files in os.walk(path):
             for filename in files:
                 if filename.endswith('-relationships.csv'):
-                    pool.map(create_relationships, [filename])
+                    #pool.map(create_relationships, [filename])
+                    create_relationships(filename)
     end_time = time.time()
     print("Operation done in ", end_time-start_time, " seconds")

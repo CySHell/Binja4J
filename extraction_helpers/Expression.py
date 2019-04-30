@@ -8,15 +8,16 @@ import xxhash
 
 class Neo4jExpression:
 
-    def __init__(self, operand_list: list, uuid, parent_instruction: int, op_description_name: str,
-                 op_description_type: str, operand_index: int):
+    def __init__(self, operand_list: list, uuid, parent_instruction_uuid: int, parent_node_type: str,
+                 op_description_name: str, op_description_type: str, operand_index: int):
         self.UUID = uuid
         self.operands = str(operand_list)
         self.HASH = self.expression_hash()
-        self.parent_instruction = parent_instruction
+        self.parent_instruction = parent_instruction_uuid
         self.op_name = op_description_name
         self.op_type = op_description_type
         self.operand_index = operand_index
+        self.parent_node_type = parent_node_type
 
     def expression_hash(self):
         expr_hash = xxhash.xxh32()
@@ -36,7 +37,7 @@ class Neo4jExpression:
                 'START_ID': self.parent_instruction,
                 'END_ID': self.UUID,
                 'TYPE': 'Operand',
-                'StartNodeLabel': 'Instruction',
+                'StartNodeLabel': self.parent_node_type,
                 'EndNodeLabel': 'Expression',
             },
             'node_attributes': {
