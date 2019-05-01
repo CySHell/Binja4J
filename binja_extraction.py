@@ -121,7 +121,7 @@ class BinjaGraph:
             bb_object = BasicBlock.Neo4jBasicBlock(basic_block, hash_exists,
                                                    parent_func_uuid, parent_bb_uuid, branch_condition)
 
-            relationship_exists = self.branch_rel_cache.get(bb_object.RELATIONSHIP_HASH)
+            relationship_exists = self.branch_rel_cache.get(str(bb_object.RELATIONSHIP_HASH))
 
             if not relationship_exists:
                 self.CSV_serializer.serialize_object(bb_object.serialize(), False, write_relationship=True)
@@ -171,17 +171,17 @@ class BinjaGraph:
         instr_object = Instruction.Neo4jInstruction(instruction, self._uuid_obj.get_uuid(), relationship_label,
                                                     parent_bb_uuid, parent_instruction_uuid)
 
-        hash_exists = self.instruction_cache.get(instr_object.HASH)
+        hash_exists = self.instruction_cache.get(str(instr_object.HASH))
         if not hash_exists:
             success = self.CSV_serializer.serialize_object(instr_object.serialize())
             if success:
-                self.instruction_cache.update({instr_object.HASH: instr_object.UUID})
+                self.instruction_cache.update({str(instr_object.HASH): instr_object.UUID})
                 # Each instruction is further extracted into an expression (a bit like an AST)
                 self.expression_extract(instruction, instr_object.UUID, 0, parent_node_type='Instruction')
         else:
             instr_object = Instruction.Neo4jInstruction(instruction, hash_exists, relationship_label,
                                                         parent_bb_uuid, parent_instruction_uuid)
-            self.CSV_serializer.serialize_object(instr_object.serialize(), write_node=False)
+            self.CSV_serializer.serialize_object(instr_object.serialize(), write_node=False, write_relationship=True)
 
         return instr_object.UUID
 
@@ -189,7 +189,7 @@ class BinjaGraph:
         """
         An expression is a breakdown of an MLIL instruction into its individual operands under a single operation
         :param instruction: BinaryNinja MLIL Insutrction object
-        :param parent_instruction_uuid: (INT)
+        :param parent_instruction_uuid: (STR)
         :param operand_index: (INT) index of the expression within the parent instruction or expression operand list
         :param parent_node_type: (STR) parent of an expression can be either an instruction or an expression
         """
@@ -199,12 +199,12 @@ class BinjaGraph:
                                                  str(instruction.ILOperations[instruction.operation]),
                                                  operand_index)
 
-        hash_exists = self.expression_cache.get(expr_object.HASH)
+        hash_exists = self.expression_cache.get(str(expr_object.HASH))
 
         if not hash_exists:
             success = self.CSV_serializer.serialize_object(expr_object.serialize())
             if success:
-                self.expression_cache.update({expr_object.HASH: expr_object.UUID})
+                self.expression_cache.update({str(expr_object.HASH): expr_object.UUID})
 
                 index = 0
                 # Iterate the operand list according to the object types specified in the MLIL_Operations enum
@@ -282,12 +282,12 @@ class BinjaGraph:
         """
 
         var_object = Var.Neo4jVar(var, uuid, index, parent_expr_uuid)
-        hash_exists = self.var_cache.get(var_object.HASH)
+        hash_exists = self.var_cache.get(str(var_object.HASH))
 
         if not hash_exists:
             success = self.CSV_serializer.serialize_object(var_object.serialize())
             if success:
-                self.var_cache.update({var_object.HASH: var_object.UUID})
+                self.var_cache.update({str(var_object.HASH): var_object.UUID})
             else:
                 print("Failed to create VAR object: ", var)
         else:
@@ -303,12 +303,12 @@ class BinjaGraph:
         :param parent_expr_uuid:
         """
         const_object = Constant.Neo4jConstant(constant, uuid, index, parent_expr_uuid)
-        hash_exists = self.const_cache.get(const_object.HASH)
+        hash_exists = self.const_cache.get(str(const_object.HASH))
 
         if not hash_exists:
             success = self.CSV_serializer.serialize_object(const_object.serialize())
             if success:
-                self.const_cache.update({const_object.HASH: const_object.UUID})
+                self.const_cache.update({str(const_object.HASH): const_object.UUID})
 
         else:
             const_object = Constant.Neo4jConstant(constant, hash_exists,

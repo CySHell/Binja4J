@@ -12,16 +12,16 @@ class Neo4jExpression:
                  op_description_name: str, op_description_type: str, operand_index: int):
         self.UUID = uuid
         self.operands = str(operand_list)
-        self.HASH = self.expression_hash()
         self.parent_instruction = parent_instruction_uuid
         self.op_name = op_description_name
         self.op_type = op_description_type
         self.operand_index = operand_index
         self.parent_node_type = parent_node_type
+        self.HASH = self.expression_hash()
 
     def expression_hash(self):
         expr_hash = xxhash.xxh32()
-        expr_hash.update(str(self.operands))
+        expr_hash.update(str(self.operands) + str(self.op_name))
 
         return expr_hash.intdigest()
 

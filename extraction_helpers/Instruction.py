@@ -19,7 +19,7 @@ class Neo4jInstruction:
 
     def instr_hash(self):
         instruction_hash = xxhash.xxh32()
-        instruction_hash.update(str(self.instr.tokens).strip('[').strip(']').replace("'", '').replace(",", ''))
+        instruction_hash.update(str(self.instr.operands) + str(self.instr.operation))
 
         return instruction_hash.intdigest()
 
@@ -39,6 +39,7 @@ class Neo4jInstruction:
             },
             'node_attributes': {
                 'Operands': self.operands,
+                'Operation': self.instr.operation
             },
             'relationship_attributes': {
                 'InstructionIndex': self.instr.instr_index,
