@@ -31,14 +31,14 @@ class Neo4jBinaryView:
         br = BinaryReader(self.bv)
 
         # calculate file hash
-        file_hash = xxhash.xxh32()
+        file_hash = xxhash.xxh64()
         # for some reason a BinaryReader won't read more then 1000 or so bytes
         temp_hash = br.read(1000)
         while temp_hash:
             file_hash.update(temp_hash)
             temp_hash = br.read(1000)
 
-        return file_hash.intdigest()
+        return file_hash.hexdigest()
 
     def serialize(self):
         csv_template = {

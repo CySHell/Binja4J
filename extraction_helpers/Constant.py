@@ -16,10 +16,10 @@ class Neo4jConstant:
         self.HASH = self.constant_hash()
 
     def constant_hash(self):
-        constant_hash = xxhash.xxh32()
+        constant_hash = xxhash.xxh64()
         constant_hash.update(str(self.constant))
 
-        return constant_hash.intdigest()
+        return constant_hash.hexdigest()
 
     def serialize(self):
         csv_template = {

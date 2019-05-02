@@ -8,22 +8,23 @@ import xxhash
 
 class Neo4jExpression:
 
-    def __init__(self, operand_list: list, uuid, parent_instruction_uuid: int, parent_node_type: str,
-                 op_description_name: str, op_description_type: str, operand_index: int):
+    def __init__(self, expression, uuid, parent_instruction_uuid: int, parent_node_type: str,
+                 operand_index: int):
         self.UUID = uuid
-        self.operands = str(operand_list)
+        self.operands = str(expression.operands)
         self.parent_instruction = parent_instruction_uuid
-        self.op_name = op_description_name
-        self.op_type = op_description_type
+        self.op_name = expression.operation.name
+        self.op_type = str(expression.ILOperations[expression.operation])
         self.operand_index = operand_index
         self.parent_node_type = parent_node_type
+        self.operation_enum = expression.operation.value
         self.HASH = self.expression_hash()
 
     def expression_hash(self):
-        expr_hash = xxhash.xxh32()
-        expr_hash.update(str(self.operands) + str(self.op_name))
+        expr_hash = xxhash.xxh64()
+        expr_hash.update(self.operands + self.op_name)
 
-        return expr_hash.intdigest()
+        return expr_hash.hexdigest()
 
     def serialize(self):
 
@@ -43,6 +44,7 @@ class Neo4jExpression:
             'node_attributes': {
                 'Operands': self.operands,
                 'OperationName': self.op_name,
+                'OperationEnum': self.operation_enum,
                 'OperationType': self.op_type,
             },
             'relationship_attributes': {

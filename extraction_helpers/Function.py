@@ -8,17 +8,16 @@ import xxhash
 
 class Neo4jFunction:
 
-    def __init__(self, mlil_func, uuid: str, relationship_label: str, bv_uuid: str):
+    def __init__(self, mlil_func, uuid: str, bv_uuid: str):
         self.UUID = uuid
         self.func = mlil_func
         self.source_function = self.func.source_function
         self.bv = self.source_function.view
         self.HASH = self.func_hash()
-        self.relationship_label = relationship_label
         self.bv_uuid = bv_uuid
 
     def func_hash(self):
-        function_hash = xxhash.xxh32()
+        function_hash = xxhash.xxh64()
         br = BinaryReader(self.bv)
 
         for basic_block in self.source_function:
@@ -26,7 +25,7 @@ class Neo4jFunction:
             bb_txt = br.read(basic_block.length)
             function_hash.update(bb_txt)
 
-        return function_hash.intdigest()
+        return function_hash.hexdigest()
 
     def serialize(self, caller_func: int = '0'):
         csv_template = {
@@ -38,8 +37,8 @@ class Neo4jFunction:
             'mandatory_relationship_dict': {
                 'START_ID': self.bv_uuid,
                 'END_ID': self.UUID,
-                'TYPE': self.relationship_label,
-                'StartNodeLabel': 'BinaryView' if self.relationship_label is 'MemberFunc' else 'Function',
+                'TYPE': 'MemberFunc',
+                'StartNodeLabel': 'BinaryView',
                 'EndNodeLabel': 'Function',
             },
             'node_attributes': {

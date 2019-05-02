@@ -18,10 +18,10 @@ class Neo4jVar:
         self.HASH = self.var_hash()
 
     def var_hash(self):
-        var_hash = xxhash.xxh32()
-        var_hash.update(self.var.name)
+        var_hash = xxhash.xxh64()
+        var_hash.update(self.var.name + str(self.source_variable_type))
 
-        return var_hash.intdigest()
+        return var_hash.hexdigest()
 
     def serialize(self):
         csv_template = {
@@ -39,6 +39,7 @@ class Neo4jVar:
             },
             'node_attributes': {
                 'SourceVarType': self.source_variable_type.name,
+                'SourceVarTypeEnum': self.source_variable_type.value,
                 'Type': self.type,
                 'Name': self.var.name
             },

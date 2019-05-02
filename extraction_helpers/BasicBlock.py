@@ -20,8 +20,8 @@ class Neo4jBasicBlock:
         self.NODE_HASH, self.RELATIONSHIP_HASH = self.bb_hash()
 
     def bb_hash(self):
-        node_hash = xxhash.xxh32()
-        relationship_hash = xxhash.xxh32()
+        node_hash = xxhash.xxh64()
+        relationship_hash = xxhash.xxh64()
 
         for disasm_text in self.bb.disassembly_text:
             if 'sub_' not in str(disasm_text):
@@ -30,7 +30,7 @@ class Neo4jBasicBlock:
         relationship_hash.update(str(self.parent_func_uuid) +
                                  str(self.UUID) + str(self.branch_condition_enum))
 
-        return node_hash.intdigest(), relationship_hash.intdigest()
+        return node_hash.hexdigest(), relationship_hash.hexdigest()
 
     def serialize(self):
         """
