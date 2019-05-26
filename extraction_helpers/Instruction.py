@@ -44,6 +44,9 @@ class Neo4jInstruction:
             'relationship_attributes': {
                 'InstructionIndex': self.instr.instr_index,
                 'ParentBB': self.parent_bb_uuid,
+                'PossibleValues': self.instr.possible_values.type.value,
+                'VarsRead': [var.name for var in self.instr.vars_read],
+                'VarsWritten': [var.name for var in self.instr.vars_written],
             },
         }
         return csv_template

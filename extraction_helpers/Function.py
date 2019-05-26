@@ -42,7 +42,8 @@ class Neo4jFunction:
                 'EndNodeLabel': 'Function',
             },
             'node_attributes': {
-
+                'ClobberedRegisters': self.func.source_function.clobbered_regs,
+                'CallingConvention': self.func.source_function.calling_convention.name,
             },
             'relationship_attributes': {
                 'Offset': self.source_function.start,

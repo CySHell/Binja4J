@@ -45,6 +45,8 @@ class Neo4jVar:
             },
             'relationship_attributes': {
                 'OperandIndex': self.operand_index,
+                'VariableDefinedAtIndex': self.var.function.mlil.get_var_definitions(self.var),
+                'VariableUsedAtIndex': self.var.function.mlil.get_var_uses(self.var),
             },
         }
 

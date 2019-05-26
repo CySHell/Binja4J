@@ -7,7 +7,8 @@ import xxhash
 
 class Neo4jBasicBlock:
 
-    def __init__(self, bb, uuid: int, parent_func_uuid: str, parent_bb_uuid: str, branch_condition_enum: int):
+    def __init__(self, bb, uuid: int, parent_func_uuid: str, parent_bb_uuid: str,
+                 branch_condition_enum: int, back_edge = False):
         """
         Init the BasicBlock node
         """
@@ -18,6 +19,7 @@ class Neo4jBasicBlock:
         self.parent_bb_uuid = parent_bb_uuid
         self.branch_condition_enum = branch_condition_enum
         self.NODE_HASH, self.RELATIONSHIP_HASH = self.bb_hash()
+        self.BackEdge = back_edge
 
     def bb_hash(self):
         node_hash = xxhash.xxh64()
@@ -27,7 +29,7 @@ class Neo4jBasicBlock:
             if 'sub_' not in str(disasm_text):
                 node_hash.update(str(disasm_text))
 
-        relationship_hash.update(str(self.parent_func_uuid) +
+        relationship_hash.update(str(self.parent_bb_uuid) +
                                  str(self.UUID) + str(self.branch_condition_enum))
 
         return node_hash.hexdigest(), relationship_hash.hexdigest()
@@ -50,7 +52,8 @@ class Neo4jBasicBlock:
                 'TYPE': self.relationship_label,
                 'REL_HASH': self.RELATIONSHIP_HASH,
                 'StartNodeLabel': 'Function' if self.relationship_label is 'MemberBB' else 'BasicBlock',
-                'EndNodeLabel': 'BasicBlock'
+                'EndNodeLabel': 'BasicBlock',
+                'BackEdge': self.BackEdge,
             },
             'node_attributes': {
             },

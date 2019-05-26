@@ -3,7 +3,7 @@ this module contains all the procedures for extracting data from a binary ninja 
 """
 
 from .extraction_helpers import BinaryView, Function, BasicBlock, \
-    Instruction, Variable, Expression, Constant
+    Instruction, Variable, Expression, Constant, Data
 
 from . import CSV_Helper
 
@@ -34,6 +34,7 @@ class BinjaGraph:
         self.var_cache = dict()
         self.const_cache = dict()
         self.branch_rel_cache = dict()
+        self.data_cache = dict()
 
     def bv_extract(self):
         """
@@ -42,13 +43,14 @@ class BinjaGraph:
 
         # Create a dictionary containing all relevant information for the graph node\relationship creation
         bv_object = BinaryView.Neo4jBinaryView(self.bv, self._uuid_obj.get_uuid())
-
         # Write the dictionary into the CSV file
         success = self.CSV_serializer.serialize_object(bv_object.serialize())
         if success:
             # Iterate all functions in the BinaryView
             for func in self.bv:
                 self.func_extract(func, bv_object.UUID)
+
+        self.add_data_objects()
 
         self.CSV_serializer.close_file_handles()
 
@@ -138,8 +140,8 @@ class BinjaGraph:
                 # branch is a back_edge, so the basic_block it points to already exists.
                 # just create the relationship between the two existing basic blocks, no new node additions
                 target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, self._uuid_obj.get_uuid(),
-                                                              parent_func_uuid, bb_object.UUID, branch.type.value)
-
+                                                              parent_func_uuid, bb_object.UUID,
+                                                              branch.type.value, back_edge=True)
                 hash_exists = self.basic_block_cache.get(target_bb_object.NODE_HASH)
 
                 if not hash_exists:
@@ -148,8 +150,14 @@ class BinjaGraph:
                     # Todo: Find a more elegant way to deal with this case
                     _, target_bb_object = self.bb_extract(branch.target, parent_func_uuid, bb_object.UUID,
                                                           branch.type.value)
+                else:
+                    # Must create correct representation of the existing BasicBlock
+                    target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, hash_exists,
+                                                                  parent_func_uuid, bb_object.UUID,
+                                                                  branch.type.value, back_edge=True)
 
                 relationship_exists = self.branch_rel_cache.get(target_bb_object.RELATIONSHIP_HASH)
+
                 if not relationship_exists:
                     self.CSV_serializer.serialize_object(target_bb_object.serialize(), False, write_relationship=True)
                     self.branch_rel_cache.update({target_bb_object.RELATIONSHIP_HASH: True})
@@ -313,3 +321,32 @@ class BinjaGraph:
             const_object = Constant.Neo4jConstant(constant, hash_exists,
                                                   index, parent_expr_uuid)
             self.CSV_serializer.serialize_object(const_object.serialize(), write_node=False, write_relationship=True)
+
+    def add_data_objects(self):
+        # This method is called after the basic CSV files were created and populated.
+        # Add all data objects found in the binary view (strings, structs, imports etc) to the CSV files
+
+        string_mapping = {}
+
+        constant_nodes_iterator = self.CSV_serializer.csv_dict_row_iterator('Constant')
+        binaryView_node_UUID = list(self.CSV_serializer.csv_dict_row_iterator('BinaryView'))[0]['UUID']
+
+        for string in self.bv.strings:
+            string_mapping.update({str(string.start): str(string.value)})
+
+        for row in constant_nodes_iterator:
+            raw_string = string_mapping.get(str(row['ConstantValue']))
+            if raw_string:
+                string_object = Data.Neo4jData(raw_string, self._uuid_obj.get_uuid(), 'String',
+                                               row['UUID'], row['LABEL'], binaryView_node_UUID)
+                hash_exists = self.data_cache.get(string_object.HASH)
+
+                if not hash_exists:
+                    success = self.CSV_serializer.serialize_object(string_object.serialize())
+                    if success:
+                        self.const_cache.update({string_object.HASH: str(string_object.UUID)})
+                else:
+                    string_object = Data.Neo4jData(raw_string, hash_exists, 'String', row['UUID'], row['LABEL'],
+                                                   binaryView_node_UUID)
+                    self.CSV_serializer.serialize_object(string_object.serialize(), write_node=False,
+                                                         write_relationship=True)

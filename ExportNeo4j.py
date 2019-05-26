@@ -27,15 +27,16 @@ def create_constraints():
         session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.HASH IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.UUID IS UNIQUE;")
 
+
 def create_nodes(filename):
     with driver.session() as session:
         filename = '\'file:/' + filename + '\' '
         print('Now Processing: ', filename)
         session.run("USING PERIODIC COMMIT 1000 "
                     "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
-                    "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
-                    "SET node.UUID = row.UUID "
-                    "RETURN true "
+                                                               "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
+                                                               "SET node.UUID = row.UUID "
+                                                               "RETURN true "
                     )
 
 
@@ -52,7 +53,6 @@ def create_relationships(filename):
                 thread_list.append(
                     threading.Thread(target=create_batch_relationships, args=[batch_rows[batch_index]]))
                 thread_list[-1].start()
-                #time.sleep(0.1)
                 batch_rows[batch_index] = []
 
             batch_index = (batch_index + 1) % Configuration.THREAD_COUNT
@@ -81,10 +81,12 @@ def create_batch_relationships(batch_rows):
                 # through each row and commit it as a single transaction
                 for row in batch_rows:
                     session.run("MATCH (start:" + row['StartNodeLabel'] + " {UUID: $start_id}) "
-                                "MATCH (end:" + row['EndNodeLabel'] + " {UUID: $end_id}) "
-                                "CALL apoc.merge.relationship(start, $row_type, {START_ID: start.UUID, "
-                                                             "END_ID: end.UUID, TYPE: $row_type}, $row, end) yield rel "
-                                "RETURN true ",start_id=row['START_ID'], end_id=row['END_ID'], row_type=row['TYPE'],
+                                                                          "MATCH (end:" + row[
+                                    'EndNodeLabel'] + " {UUID: $end_id}) "
+                                                      "CALL apoc.merge.relationship(start, $row_type, {START_ID: start.UUID, "
+                                                      "END_ID: end.UUID, TYPE: $row_type}, $row, end) yield rel "
+                                                      "RETURN true ", start_id=row['START_ID'], end_id=row['END_ID'],
+                                row_type=row['TYPE'],
                                 row=row)
 
                 return
@@ -99,22 +101,35 @@ def create_batch_relationships(batch_rows):
         print("Exceeded retry count for committing relationships")
 
 
+def BinaryViewExists():
+    with driver.session() as session:
+        fname = '\'file:/BinaryView-nodes.csv\''
+        return session.run("LOAD CSV WITH HEADERS FROM " + fname + "AS row "
+                                                                   "MATCH (bv:BinaryView {HASH: row.HASH}) "
+                                                                   "RETURN exists(bv.UUID) "
+                           ).peek()
+
+
 if __name__ == "__main__":
     start_time = time.time()
 
     create_constraints()
-    # handling of node and relationship DB insertions are different because nodes are independant from each other
+    # handling of node and relationship DB insertions are different because nodes are independent from each other
     # so it is safe to insert them in a fast efficient manner (using indexes).
     # Relationships are dependant on the nodes they are connected to, and their creation is subject to deadlocks
     # and other multi-threading plagues.
-    for root, dirs, files in os.walk(Configuration.path):
-        for filename in files:
-            if filename.endswith('-nodes.csv'):
-                create_nodes(filename)
-    for root, dirs, files in os.walk(Configuration.path):
-        for filename in files:
-            if filename.endswith('-relationships.csv'):
-                create_relationships(filename)
+
+    if not BinaryViewExists():
+        for root, dirs, files in os.walk(Configuration.path):
+            for filename in files:
+                if filename.endswith('-nodes.csv'):
+                    create_nodes(filename)
+        for root, dirs, files in os.walk(Configuration.path):
+            for filename in files:
+                if filename.endswith('-relationships.csv'):
+                    create_relationships(filename)
+    else:
+        print("BinaryView already exists in DB, skipping export.")
 
     end_time = time.time()
     print("Operation done in ", end_time - start_time, " seconds")
