@@ -27,7 +27,7 @@ class Neo4jFunction:
 
         return function_hash.hexdigest()
 
-    def serialize(self, caller_func: int = '0'):
+    def serialize(self):
         csv_template = {
             'mandatory_node_dict': {
                 'UUID': self.UUID,
@@ -40,6 +40,7 @@ class Neo4jFunction:
                 'TYPE': 'MemberFunc',
                 'StartNodeLabel': 'BinaryView',
                 'EndNodeLabel': 'Function',
+                'Name': self.func.source_function.name
             },
             'node_attributes': {
                 'ClobberedRegisters': self.func.source_function.clobbered_regs,
@@ -47,7 +48,6 @@ class Neo4jFunction:
             },
             'relationship_attributes': {
                 'Offset': self.source_function.start,
-                'CallerFunc': caller_func,
             },
         }
         return csv_template

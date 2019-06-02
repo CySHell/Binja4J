@@ -1,5 +1,5 @@
 import csv
-from . import Configuration
+from .. import Configuration
 
 
 class CSV_Serialize:
@@ -19,8 +19,6 @@ class CSV_Serialize:
         self.Variable = open(Configuration.path + 'Vars-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
         self.MemberFunc = open(Configuration.path + 'MemberFunc-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.Calls = open(Configuration.path + 'Calls-relationships.csv', 'w+', buffering=1, encoding='utf-8',
-                          newline='')
         self.MemberBB = open(Configuration.path + 'MemberBB-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                              newline='')
         self.Branch = open(Configuration.path + 'Branch-relationships.csv', 'w+', buffering=1, encoding='utf-8',
@@ -29,8 +27,6 @@ class CSV_Serialize:
                                      encoding='utf-8', newline='')
         self.NextInstruction = open(Configuration.path + 'NextInstruction-relationships.csv', 'w+', buffering=1,
                                     encoding='utf-8', newline='')
-        self.BreakDown = open(Configuration.path + 'BreakDown-relationships.csv', 'w+', buffering=1, encoding='utf-8',
-                              newline='')
         self.Operand = open(Configuration.path + 'Operand-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                             newline='')
         self.VarOperand = open(Configuration.path + 'VarOperand-relationships.csv', 'w+', buffering=1, encoding='utf-8',
@@ -43,15 +39,23 @@ class CSV_Serialize:
 
         self.String = open(Configuration.path + 'String-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.Data = open(Configuration.path + 'Data-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.Symbol = open(Configuration.path + 'Symbol-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+
+        self.StringRef = open(Configuration.path + 'StringRef-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+
+        self.SymbolRef = open(Configuration.path + 'SymbolRef-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+
+        self.FunctionCall = open(Configuration.path + 'FunctionCall-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
         self.types = {
             'BinaryView': self.BinaryView, 'Function': self.Function, 'BasicBlock': self.BasicBlock,
             'Instruction': self.Instruction, 'Expression': self.Expression, 'Variable': self.Variable,
-            'MemberFunc': self.MemberFunc, 'Calls': self.Calls, 'MemberBB': self.MemberBB, 'MemberBV': self.MemberBV,
+            'MemberFunc': self.MemberFunc, 'MemberBB': self.MemberBB, 'MemberBV': self.MemberBV,
             'VarOperand': self.VarOperand, 'Constant': self.Constant, 'ConstantOperand': self.ConstantOperand,
-            'Operand': self.Operand, 'BreakDown': self.BreakDown, 'NextInstruction': self.NextInstruction,
-            'InstructionChain': self.InstructionChain, 'Branch': self.Branch, 'String': self.String, 'Data': self.Data,
+            'Operand': self.Operand, 'NextInstruction': self.NextInstruction,
+            'InstructionChain': self.InstructionChain, 'Branch': self.Branch, 'String': self.String,
+            'Symbol': self.Symbol, 'StringRef': self.StringRef, 'SymbolRef': self.SymbolRef,
+            'FunctionCall': self.FunctionCall,
         }
 
     def serialize_object(self, csv_template: dict, write_node=True, write_relationship=True):

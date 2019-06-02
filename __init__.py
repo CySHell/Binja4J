@@ -5,8 +5,8 @@ This module exports a binary ninja MLIL binary view of a file into a neo4j graph
 from neo4j import GraphDatabase
 import time
 from binaryninja import *
-from . import binja_extraction
-from . import UUID_Generator
+from .CSV_Processing import BuildCSV
+from .Common import UUID_Generator
 from . import Configuration
 
 
@@ -17,7 +17,7 @@ def main(bv):
 
     uuid_obj = UUID_Generator.UUID(driver)
 
-    binja_graph = binja_extraction.BinjaGraph(driver, uuid_obj, bv)
+    binja_graph = BuildCSV.BinjaGraph(driver, uuid_obj, bv)
 
     binja_graph.bv_extract()
 

@@ -2,10 +2,10 @@
 this module contains all the procedures for extracting data from a binary ninja binary view.
 """
 
-from .extraction_helpers import BinaryView, Function, BasicBlock, \
-    Instruction, Variable, Expression, Constant, Data
+from ..extraction_helpers import BinaryView, Function, BasicBlock, Instruction, Expression, Constant, \
+    Variable
 
-from . import CSV_Helper
+from . import CSV_Helper, PostProcessing
 
 
 class BinjaGraph:
@@ -14,19 +14,20 @@ class BinjaGraph:
     #   2. Determine the relationships between all objects in the BinaryView
     #   3. Collect any additional information requested by the user from each object (via the /extraction_helpers)
 
-    def __init__(self, driver, uuid_obj, bv):
+    def __init__(self, driver, uuid_generator, bv):
         """
         :param driver: The Neo4jBoltDriver object, facilitates communication with the DB
-        :param uuid_obj: Provides UUID's for newly created objects
+        :param uuid_generator: Provides UUID's for newly created objects
         :param bv: BinaryNinja BinaryView object, all information is extracted from this object
         """
-        self._driver = driver
-        self._uuid_obj = uuid_obj
+        self.driver = driver
+        self.uuid_generator = uuid_generator
         self.bv = bv
         self.CSV_serializer = CSV_Helper.CSV_Serialize()
 
         # Caching objects to allow for faster CSV creation.
         # Each object is in the form of {HASH: UUID}
+
         self.function_cache = dict()
         self.basic_block_cache = dict()
         self.instruction_cache = dict()
@@ -34,7 +35,6 @@ class BinjaGraph:
         self.var_cache = dict()
         self.const_cache = dict()
         self.branch_rel_cache = dict()
-        self.data_cache = dict()
 
     def bv_extract(self):
         """
@@ -42,7 +42,7 @@ class BinjaGraph:
         """
 
         # Create a dictionary containing all relevant information for the graph node\relationship creation
-        bv_object = BinaryView.Neo4jBinaryView(self.bv, self._uuid_obj.get_uuid())
+        bv_object = BinaryView.Neo4jBinaryView(self.bv, self.uuid_generator.get_uuid())
         # Write the dictionary into the CSV file
         success = self.CSV_serializer.serialize_object(bv_object.serialize())
         if success:
@@ -50,7 +50,16 @@ class BinjaGraph:
             for func in self.bv:
                 self.func_extract(func, bv_object.UUID)
 
-        self.add_data_objects()
+        cache = {
+            'Function': self.function_cache,
+            'BasicBlock': self.basic_block_cache,
+            'Instruction': self.instruction_cache,
+            'Expression': self.expression_cache,
+            'Variable': self.var_cache,
+            'Constant': self.const_cache,
+        }
+        post_processor = PostProcessing.PostProcessor(self.bv, self.CSV_serializer, self.uuid_generator, cache)
+        post_processor.run_all()
 
         self.CSV_serializer.close_file_handles()
 
@@ -60,7 +69,7 @@ class BinjaGraph:
         :param bv_uuid: UUID of the containing BinaryView
         """
 
-        func_object = Function.Neo4jFunction(func.mlil, self._uuid_obj.get_uuid(), bv_uuid)
+        func_object = Function.Neo4jFunction(func.mlil, self.uuid_generator.get_uuid(), bv_uuid)
 
         hash_exists = self.function_cache.get(func_object.HASH)
         if not hash_exists:
@@ -102,7 +111,7 @@ class BinjaGraph:
         :param branch_condition: branch condition to get to this basic block (0 = Unconditional, 1 = False, 2 = True)
         :return: outgoing_edges_list: (LIST) a list of all the branches from this basic block that still need parsing
         """
-        bb_object = BasicBlock.Neo4jBasicBlock(basic_block, self._uuid_obj.get_uuid(),
+        bb_object = BasicBlock.Neo4jBasicBlock(basic_block, self.uuid_generator.get_uuid(),
                                                parent_func_uuid, parent_bb_uuid, branch_condition)
 
         hash_exists = self.basic_block_cache.get(bb_object.NODE_HASH)
@@ -139,7 +148,7 @@ class BinjaGraph:
             else:
                 # branch is a back_edge, so the basic_block it points to already exists.
                 # just create the relationship between the two existing basic blocks, no new node additions
-                target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, self._uuid_obj.get_uuid(),
+                target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, self.uuid_generator.get_uuid(),
                                                               parent_func_uuid, bb_object.UUID,
                                                               branch.type.value, back_edge=True)
                 hash_exists = self.basic_block_cache.get(target_bb_object.NODE_HASH)
@@ -172,7 +181,7 @@ class BinjaGraph:
         :return: (int): the UUID of the newly created instruction object
         """
 
-        instr_object = Instruction.Neo4jInstruction(instruction, self._uuid_obj.get_uuid(),
+        instr_object = Instruction.Neo4jInstruction(instruction, self.uuid_generator.get_uuid(),
                                                     parent_bb_uuid, parent_instruction_uuid)
 
         hash_exists = self.instruction_cache.get(instr_object.HASH)
@@ -199,7 +208,7 @@ class BinjaGraph:
         :param operand_index: (INT) index of the expression within the parent instruction or expression operand list
         :param parent_node_type: (STR) parent of an expression can be either an instruction or an expression
         """
-        expr_object = Expression.Neo4jExpression(instruction, self._uuid_obj.get_uuid(),
+        expr_object = Expression.Neo4jExpression(instruction, self.uuid_generator.get_uuid(),
                                                  parent_instruction_uuid, parent_node_type,
                                                  operand_index)
 
@@ -222,7 +231,7 @@ class BinjaGraph:
                         index += 1
                         continue
                     if op_description_type == 'var':
-                        self.var_extract(instruction.operands[index], self._uuid_obj.get_uuid(),
+                        self.var_extract(instruction.operands[index], self.uuid_generator.get_uuid(),
                                          index, expr_object.UUID)
                         index += 1
                         continue
@@ -233,12 +242,12 @@ class BinjaGraph:
                     if op_description_type == 'var_list':
                         var_index = 0
                         for il_variable in instruction.operands[index]:
-                            self.var_extract(il_variable, self._uuid_obj.get_uuid(), var_index, expr_object.UUID)
+                            self.var_extract(il_variable, self.uuid_generator.get_uuid(), var_index, expr_object.UUID)
                             var_index += 1
                         index += 1
                         continue
                     if op_description_type == 'int':
-                        self.constant_extract(instruction.operands[index], self._uuid_obj.get_uuid(),
+                        self.constant_extract(instruction.operands[index], self.uuid_generator.get_uuid(),
                                               index, expr_object.UUID)
                         index += 1
                         continue
@@ -247,7 +256,7 @@ class BinjaGraph:
                         index += 1
                         continue
                     if op_description_type == 'float':
-                        self.constant_extract(instruction.operands[index], self._uuid_obj.get_uuid(),
+                        self.constant_extract(instruction.operands[index], self.uuid_generator.get_uuid(),
                                               index, expr_object.UUID)
                         index += 1
                         continue
@@ -321,32 +330,3 @@ class BinjaGraph:
             const_object = Constant.Neo4jConstant(constant, hash_exists,
                                                   index, parent_expr_uuid)
             self.CSV_serializer.serialize_object(const_object.serialize(), write_node=False, write_relationship=True)
-
-    def add_data_objects(self):
-        # This method is called after the basic CSV files were created and populated.
-        # Add all data objects found in the binary view (strings, structs, imports etc) to the CSV files
-
-        string_mapping = {}
-
-        constant_nodes_iterator = self.CSV_serializer.csv_dict_row_iterator('Constant')
-        binaryView_node_UUID = list(self.CSV_serializer.csv_dict_row_iterator('BinaryView'))[0]['UUID']
-
-        for string in self.bv.strings:
-            string_mapping.update({str(string.start): str(string.value)})
-
-        for row in constant_nodes_iterator:
-            raw_string = string_mapping.get(str(row['ConstantValue']))
-            if raw_string:
-                string_object = Data.Neo4jData(raw_string, self._uuid_obj.get_uuid(), 'String',
-                                               row['UUID'], row['LABEL'], binaryView_node_UUID)
-                hash_exists = self.data_cache.get(string_object.HASH)
-
-                if not hash_exists:
-                    success = self.CSV_serializer.serialize_object(string_object.serialize())
-                    if success:
-                        self.const_cache.update({string_object.HASH: str(string_object.UUID)})
-                else:
-                    string_object = Data.Neo4jData(raw_string, hash_exists, 'String', row['UUID'], row['LABEL'],
-                                                   binaryView_node_UUID)
-                    self.CSV_serializer.serialize_object(string_object.serialize(), write_node=False,
-                                                         write_relationship=True)

@@ -23,13 +23,13 @@ class DiaFunc:
         self.instruction_count = 0
         self.clobbered_registers = []
         self.cyclomatic_complexity = 0
-        self.symbol_list = []
+        self.func_strings = self.populate_strings()
+        self.symbol_list = self.populate_symbols()
         self.hash = ''
         self.fuzzy_hash = {
             'SSDEEP': None,
         }
         self.calling_convention = ''
-
 
         if usage is 'Obtain':
             self.usage = usage
@@ -41,6 +41,8 @@ class DiaFunc:
             else:
                 print('Error initializing DiaFunc object, bad usage string given: ', usage)
 
+        print(self.func_strings)
+
     def obtain(self):
         pass
 
@@ -50,27 +52,98 @@ class DiaFunc:
         # Connect this node to the actual Function node (MLIL Function) that it represents
         with self.driver.session() as session:
             # Get information from the function node properties
+            self.populate_from_node_properties()
+
+            # Get information regarding the graph structure of the function
+            self.populate_graph_related_attributes()
+
+            # Get all symbols from this function
+            self.populate_strings()
+
+            self.populate_symbols()
+
+            print("stop")
+
+    def populate_from_node_properties(self):
+        with self.driver.session() as session:
+            # Get information from the function node properties
             node_properties = session.run("MATCH (f:Function {UUID: '" + self.func_uuid + "'}) return properties(f)")
             node_properties = node_properties.peek()[0]
             self.calling_convention = node_properties['CallingConvention']
             self.clobbered_registers = node_properties['ClobberedRegisters']
             self.hash = node_properties['HASH']
 
-            # Get information regarding the context and surrounding of the function and its inhabitants
+    def populate_graph_related_attributes(self):
+        with self.driver.session() as session:
+            # Get information regarding the graph structure of the function
             test = session.run("MATCH (:BasicBlock)-[r:Branch {ParentFunctionUUID: \"" + self.func_uuid +
-                               "\"}]->(end:BasicBlock) " 
+                               "\"}]->(end:BasicBlock) "
                                "RETURN count(DISTINCT(end)) as vertices_count, count(DISTINCT(r)) as edges_count ")
             self.edge_count = test.peek()['edges_count']
             self.basic_block_count = test.peek()['vertices_count']
-            populate_symbol_list()
 
+    def populate_strings(self):
+        string_dict = {}
+        with self.driver.session() as session:
+            string_list = session.run("MATCH ()-[:MemberBB|:Branch {ParentFunctionUUID: \'" +
+                                      self.func_uuid + "\'}]->(bb:BasicBlock) "
+                                                       "WITH collect(bb) as bb_list "
+                                                       "UNWIND bb_list as basicBlock "
+                                                       "MATCH ()-[:InstructionChain|:NextInstruction "
+                                                       "{ParentBB: basicBlock.UUID}]->(instruction:Instruction) "
+                                                       "WITH collect(instruction) as instruction_list "
+                                                       "UNWIND instruction_list as instr "
+                                                       "MATCH (instr)-[:Operand*1..3]-(exp:Expression) "
+                                                       "WITH collect(exp) as expression_list "
+                                                       "UNWIND expression_list as expression "
+                                                       "MATCH (expression)-[:ConstantOperand]->(const:Constant) "
+                                                       "WITH collect(const) as constant_list "
+                                                       "MATCH (bv:BinaryView)-[:MemberFunc]->"
+                                                       "                      (:Function {UUID: \'" + self.func_uuid + "\'})"
+                                                       "UNWIND constant_list as constant "
+                                                       "MATCH (constant)-[:StringRef]->(string:String) "
+                                                       "MATCH (:Constant)-[:StringRef {BinaryViewUUID: bv.UUID}]->(string)"
+                                                       "RETURN collect(string) as strList").single().value()
 
+            # Each string is a String Neo4j node object within the current function
+            for string in string_list:
+                string_dict.update({string['HASH']: string['RawData']})
+
+            return string_dict
+
+    def populate_symbols(self):
+        symbol_dict = {}
+        with self.driver.session() as session:
+            symbol_list = session.run("MATCH ()-[:MemberBB|:Branch {ParentFunctionUUID: \'" +
+                                      self.func_uuid + "\'}]->(bb:BasicBlock) "
+                                                       "WITH collect(bb) as bb_list "
+                                                       "UNWIND bb_list as basicBlock "
+                                                       "MATCH ()-[:InstructionChain|:NextInstruction "
+                                                       "{ParentBB: basicBlock.UUID}]->(instruction:Instruction) "
+                                                       "WITH collect(instruction) as instruction_list "
+                                                       "UNWIND instruction_list as instr "
+                                                       "MATCH (instr)-[:Operand*1..3]-(exp:Expression) "
+                                                       "WITH collect(exp) as expression_list "
+                                                       "UNWIND expression_list as expression "
+                                                       "MATCH (expression)-[:ConstantOperand]->(const:Constant) "
+                                                       "WITH collect(const) as constant_list "
+                                                       "MATCH (bv:BinaryView)-[:MemberFunc]->"
+                                                       "                      (:Function {UUID: \'" + self.func_uuid + "\'})"
+                                                       "UNWIND constant_list as constant "
+                                                       "MATCH (constant)-[:SymbolRef]->(symbol:Symbol) "
+                                                       "MATCH (:Constant)-[:SymbolRef {BinaryViewUUID: bv.UUID}]->(symbol)"
+                                                       "RETURN collect(symbol) as symbolList").single().value()
+
+            # Each symbol is a Symbol Neo4j node object within the current function
+            for symbol in symbol_list:
+                symbol_dict.update({symbol['HASH']: symbol['SymbolName']})
+
+            return symbol_dict
 
 
 if __name__ == "__main__":
     driver = GraphDatabase.driver(Configuration.uri, auth=(Configuration.user, Configuration.password),
                                   max_connection_lifetime=60, max_connection_pool_size=1000,
                                   connection_acquisition_timeout=30)
-    df = DiaFunc(driver, '49efb0bc-6884-438a-9523-f76fc63e7d17', 'Populate')
+    df = DiaFunc(driver, 'fb1a0415-cb75-46c3-bb43-39055ec8c370', 'Populate')
     print("stop")
-

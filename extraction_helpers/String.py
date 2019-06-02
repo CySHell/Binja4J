@@ -3,45 +3,43 @@ import xxhash
 
 
 ################################################################################################################
-#                                       DATA                                                                   #
+#                                       String                                                                 #
 ################################################################################################################
 
-class Neo4jData:
+class Neo4jString:
 
-    def __init__(self, raw_data, uuid: str, data_type: str, parent_node_uuid: str,
-                 parent_node_type: str, binaryViewUUID: str):
+    def __init__(self, raw_string, uuid: str, parent_node_uuid: str, parent_node_type: str, binaryViewUUID: str):
 
         self.UUID = uuid
         self.binaryViewUUID = binaryViewUUID
-        self.raw_data = raw_data
-        self.data_type = data_type
-        self.HASH = self.data_hash()
+        self.raw_string = raw_string
+        self.HASH = self.string_hash()
         self.parent_node_uuid = parent_node_uuid
         self.parent_node_type = parent_node_type
 
-    def data_hash(self):
-        data_hash = xxhash.xxh64()
-        data_hash.update(str(self.raw_data) + self.data_type)
+    def string_hash(self):
+        string_hash = xxhash.xxh64()
+        string_hash.update(self.raw_string)
 
-        return data_hash.hexdigest()
+        return string_hash.hexdigest()
 
     def serialize(self):
         csv_template = {
             'mandatory_node_dict': {
                 'HASH': self.HASH,
                 'UUID': self.UUID,
-                'LABEL': self.data_type,
+                'LABEL': 'String',
             },
             'mandatory_relationship_dict': {
                 'START_ID': self.parent_node_uuid,
                 'END_ID': self.UUID,
-                'TYPE': 'Data',
+                'TYPE': 'StringRef',
                 'StartNodeLabel': self.parent_node_type,
-                'EndNodeLabel': self.data_type,
+                'EndNodeLabel': 'String',
                 'BinaryViewUUID': self.binaryViewUUID,
             },
             'node_attributes': {
-                'RawData': str(self.raw_data).strip(),
+                'RawString': str(self.raw_string).strip(),
             },
             'relationship_attributes': {
 

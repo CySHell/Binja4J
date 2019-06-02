@@ -13,9 +13,14 @@ class Neo4jInstruction:
         self.instr = instr
         self.HASH = self.instr_hash()
         self.operands = str(instr.operands)
-        self.relationship_label = 'InstructionChain' if parent_bb_uuid == parent_instruction_uuid else 'NextInstruction'
         self.parent_bb_uuid = parent_bb_uuid
         self.parent_instruction_uuid = parent_instruction_uuid
+        if parent_bb_uuid == parent_instruction_uuid:
+            self.relationship_label = 'InstructionChain'
+        else:
+            self.relationship_label = 'NextInstruction'
+
+
 
     def instr_hash(self):
         instruction_hash = xxhash.xxh64()
@@ -38,8 +43,8 @@ class Neo4jInstruction:
                 'EndNodeLabel': 'Instruction',
             },
             'node_attributes': {
-                'Operands': self.operands,
-                'Operation': self.instr.operation
+                #'Operands': self.operands,
+                #'Operation': self.instr.operation
             },
             'relationship_attributes': {
                 'InstructionIndex': self.instr.instr_index,
