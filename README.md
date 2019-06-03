@@ -40,8 +40,7 @@ Please note that only MEDIUM LEVEL IL (MLIL) exporting is supported, not raw ass
   Graph Representation
   
   - The basic graph representation in the graph DB uses the following Ontology:
-  
-![image](https://user-images.githubusercontent.com/34336222/56972997-aaf3e600-6b74-11e9-86b0-d8fa6a0bf214.png)
+![image](https://user-images.githubusercontent.com/34336222/58807914-aa41ea00-8621-11e9-877f-d92310b0296d.png)
   
   
   Demo Screenshots
