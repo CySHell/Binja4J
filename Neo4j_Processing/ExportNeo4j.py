@@ -79,11 +79,12 @@ def create_batch_relationships(batch_rows):
                 # Because of the use of dynamic labels on the start\end nodes during the MATCH, and the possibility
                 # of different labels between different rows within a batch - it is necessary to inefficiently go
                 # through each row and commit it as a single transaction
+                # TODO: figure out how to do this more efficiently
                 for row in batch_rows:
                     session.run("MATCH (start:" + row['StartNodeLabel'] + " {UUID: $start_id}) "
-                                                                          "MATCH (end:" + row[
-                                    'EndNodeLabel'] + " {UUID: $end_id}) "
-                                                      "CALL apoc.merge.relationship(start, $row_type, {START_ID: start.UUID, "
+                                                      "MATCH (end:" + row['EndNodeLabel'] + " {UUID: $end_id}) "
+                                                      "CALL apoc.merge.relationship(start, $row_type,"
+                                                      " {START_ID: start.UUID, "
                                                       "END_ID: end.UUID, TYPE: $row_type}, $row, end) yield rel "
                                                       "RETURN true ", start_id=row['START_ID'], end_id=row['END_ID'],
                                 row_type=row['TYPE'],
@@ -110,6 +111,29 @@ def BinaryViewExists():
                            ).peek()
 
 
+def GraphCleanup():
+    # Clean up all the helper attributes from the graph
+    node_attributes_to_clean = ['LABEL', 'UUID', 'RootFunction', 'RootBasicBlock', 'RootInstruction', 'RootExpression']
+    relationship_attributes_to_clean = ['START_ID', 'END_ID', 'TYPE', 'StartNodeLabel', 'EndNodeLabel',
+                                        'RootFunction', 'RootBasicBlock', 'RootInstruction', 'RootExpression']
+
+    fname = '\'file:/BinaryView-nodes.csv\''
+    node_cypher_expression = ''
+    relationship_cypher_expression = ''
+
+    for attribute in node_attributes_to_clean:
+        node_cypher_expression += 'REMOVE n.' + attribute + ' '
+    for attribute in relationship_attributes_to_clean:
+        relationship_cypher_expression += 'REMOVE rel.' + attribute + ' '
+
+    cypher_expression = node_cypher_expression + relationship_cypher_expression
+
+    with driver.session() as session:
+        session.run("LOAD CSV WITH HEADERS FROM " + fname + "AS row "
+                    "MATCH (n)-[rel {RootBinaryView: row.UUID}]->() " + cypher_expression)
+
+        #session.run("MATCH ()-[rel]-() " + relationship_cypher_expression)
+
 if __name__ == "__main__":
     start_time = time.time()
 
@@ -130,6 +154,9 @@ if __name__ == "__main__":
                     create_relationships(filename)
     else:
         print("BinaryView already exists in DB, skipping export.")
+
+    print("Starting graph node attribute cleanup...")
+    GraphCleanup()
 
     end_time = time.time()
     print("Operation done in ", end_time - start_time, " seconds")

@@ -16,7 +16,7 @@ class CSV_Serialize:
                                 newline='')
         self.Expression = open(Configuration.path + 'Expressions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.Variable = open(Configuration.path + 'Vars-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.Variable = open(Configuration.path + 'Variables-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
         self.MemberFunc = open(Configuration.path + 'MemberFunc-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
         self.MemberBB = open(Configuration.path + 'MemberBB-relationships.csv', 'w+', buffering=1, encoding='utf-8',
@@ -47,6 +47,10 @@ class CSV_Serialize:
 
         self.FunctionCall = open(Configuration.path + 'FunctionCall-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
+        self.DefinedAt = open(Configuration.path + 'DefinedAt-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+
+        self.UsedAt = open(Configuration.path + 'UsedAt-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+
         self.types = {
             'BinaryView': self.BinaryView, 'Function': self.Function, 'BasicBlock': self.BasicBlock,
             'Instruction': self.Instruction, 'Expression': self.Expression, 'Variable': self.Variable,
@@ -55,7 +59,7 @@ class CSV_Serialize:
             'Operand': self.Operand, 'NextInstruction': self.NextInstruction,
             'InstructionChain': self.InstructionChain, 'Branch': self.Branch, 'String': self.String,
             'Symbol': self.Symbol, 'StringRef': self.StringRef, 'SymbolRef': self.SymbolRef,
-            'FunctionCall': self.FunctionCall,
+            'FunctionCall': self.FunctionCall, 'DefinedAt': self.DefinedAt, 'UsedAt': self.UsedAt,
         }
 
     def serialize_object(self, csv_template: dict, write_node=True, write_relationship=True):
@@ -75,13 +79,18 @@ class CSV_Serialize:
             if write_relationship:
                 relationship_fieldnames = list(csv_template['mandatory_relationship_dict'])
                 relationship_fieldnames.extend(list(csv_template['relationship_attributes']))
+                relationship_fieldnames.extend(list(csv_template['mandatory_context_dict']))
+
                 relationship_writer = csv.DictWriter(self.types[csv_template['mandatory_relationship_dict']['TYPE']],
                                                      fieldnames=relationship_fieldnames)
+
                 if not self.types[csv_template['mandatory_relationship_dict']['TYPE']].tell():
                     relationship_writer.writeheader()
+
                 relationship_row = csv_template['mandatory_relationship_dict']
                 if csv_template['relationship_attributes']:
                     relationship_row.update(csv_template['relationship_attributes'])
+                    relationship_row.update(csv_template['mandatory_context_dict'])
                 relationship_writer.writerow(relationship_row)
 
         except csv.Error:

@@ -7,6 +7,8 @@ from ..extraction_helpers import BinaryView, Function, BasicBlock, Instruction, 
 
 from . import CSV_Helper, PostProcessing
 
+from ..Common import ContextManagement
+
 
 class BinjaGraph:
     #   The BinjaGraph object holds the main functionality of the whole plugin:
@@ -58,32 +60,42 @@ class BinjaGraph:
             'Variable': self.var_cache,
             'Constant': self.const_cache,
         }
-        post_processor = PostProcessing.PostProcessor(self.bv, self.CSV_serializer, self.uuid_generator, cache)
+        post_processor = PostProcessing.CSVPostProcessor(self.bv, self.CSV_serializer, self.uuid_generator, cache)
         post_processor.run_all()
 
         self.CSV_serializer.close_file_handles()
 
     def func_extract(self, func, bv_uuid: str):
         """
-        :param func: BinaryNinja function object to parse
+        :param func: BinaryNinja RootFunction object to parse
         :param bv_uuid: UUID of the containing BinaryView
         """
 
-        func_object = Function.Neo4jFunction(func.mlil, self.uuid_generator.get_uuid(), bv_uuid)
+        # Create the context object for everything under this RootFunction
+        current_context = ContextManagement.Context(bv_uuid)
+
+        func_object = Function.Neo4jFunction(func.mlil, self.uuid_generator.get_uuid(), current_context)
 
         hash_exists = self.function_cache.get(func_object.HASH)
+
         if not hash_exists:
-            # The function doesn't already exist in the CSV
+            # The RootFunction doesn't already exist in the CSV
+
+            # Update current context
+            current_context.RootFunction = func_object.UUID
+
             success = self.CSV_serializer.serialize_object(func_object.serialize())
-            bb_control_flow_graph = [(func.mlil.basic_blocks[0], func_object.UUID, func_object.UUID, 0)]
+            bb_control_flow_graph = [(func.mlil.basic_blocks[0], 0)]
             processed_bb_list = []
             if success:
-                # Iterate over all basic blocks in the function and create the relationships
+
+
+
+                # Iterate over all basic blocks in the RootFunction and create the relationships
                 # between them according to the control flow graph (I.E with branches between basic blocks)
                 current_bb = bb_control_flow_graph.pop()
                 while current_bb:
-                    bb_list, _ = self.bb_extract(current_bb[0], current_bb[1], current_bb[2],
-                                                 current_bb[3])
+                    bb_list, _ = self.bb_extract(current_bb[0], current_bb[1], current_context)
                     bb_recursion_halt = False
                     for bb in bb_list:
                         if bb in processed_bb_list:
@@ -103,34 +115,31 @@ class BinjaGraph:
             func_object = Function.Neo4jFunction(func.mlil, hash_exists, bv_uuid)
             self.CSV_serializer.serialize_object(func_object.serialize(), write_node=False, write_relationship=True)
 
-    def bb_extract(self, basic_block, parent_func_uuid: str, parent_bb_uuid: str, branch_condition: bool):
+    def bb_extract(self, basic_block, branch_condition: bool, context: ContextManagement.Context):
         """
         :param basic_block: BinaryNinja basic block object to parse
-        :param parent_func_uuid: UUID of the parent function for this basic block
-        :param parent_bb_uuid: UUID of the basic block that branched out to the current basic block
         :param branch_condition: branch condition to get to this basic block (0 = Unconditional, 1 = False, 2 = True)
+        :param context: the current RootFunction context we are working on
         :return: outgoing_edges_list: (LIST) a list of all the branches from this basic block that still need parsing
         """
-        bb_object = BasicBlock.Neo4jBasicBlock(basic_block, self.uuid_generator.get_uuid(),
-                                               parent_func_uuid, parent_bb_uuid, branch_condition)
+        bb_object = BasicBlock.Neo4jBasicBlock(basic_block, self.uuid_generator.get_uuid(), branch_condition, context)
 
         hash_exists = self.basic_block_cache.get(bb_object.NODE_HASH)
 
         if not hash_exists:
             success = self.CSV_serializer.serialize_object(bb_object.serialize())
             if success:
+                # Update context
+                context.RootBasicBlock = bb_object.UUID
+
                 self.basic_block_cache.update({bb_object.NODE_HASH: str(bb_object.UUID)})
                 self.branch_rel_cache.update({bb_object.RELATIONSHIP_HASH: True})
 
-                # build the instruction chain under the BB
-                parent_bb_uuid = bb_object.UUID
-                parent_instruction_uuid = bb_object.UUID
+                # build the RootInstruction chain under the BB
                 for instruction in basic_block:
-                    parent_instruction_uuid = self.instruction_extract(instruction, parent_bb_uuid,
-                                                                       parent_instruction_uuid)
+                    context.RootInstruction = self.instruction_extract(instruction, context)
         else:
-            bb_object = BasicBlock.Neo4jBasicBlock(basic_block, hash_exists,
-                                                   parent_func_uuid, parent_bb_uuid, branch_condition)
+            bb_object = BasicBlock.Neo4jBasicBlock(basic_block, hash_exists, branch_condition, context)
 
             relationship_exists = self.branch_rel_cache.get(bb_object.RELATIONSHIP_HASH)
 
@@ -138,32 +147,32 @@ class BinjaGraph:
                 self.CSV_serializer.serialize_object(bb_object.serialize(), False, write_relationship=True)
                 self.branch_rel_cache.update({bb_object.RELATIONSHIP_HASH: True})
 
+            # Update context
+            context.RootBasicBlock = bb_object.UUID
+
         outgoing_edges_list = []
         # Iterate all branches of the current basic block and create them
         for branch in basic_block.outgoing_edges:
             if branch.back_edge is False:
                 # if the branch isn't a back_edge just add it to the list to be processed in the future
-                branch_struct = [branch.target, parent_func_uuid, bb_object.UUID, branch.type.value]
+                branch_struct = [branch.target, branch.type.value, context]
                 outgoing_edges_list.append(branch_struct)
             else:
                 # branch is a back_edge, so the basic_block it points to already exists.
                 # just create the relationship between the two existing basic blocks, no new node additions
                 target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, self.uuid_generator.get_uuid(),
-                                                              parent_func_uuid, bb_object.UUID,
-                                                              branch.type.value, back_edge=True)
+                                                              branch.type.value, context, back_edge=True)
                 hash_exists = self.basic_block_cache.get(target_bb_object.NODE_HASH)
 
                 if not hash_exists:
                     # In the edge case that the basic block that is being branched to doesn't yet exist,
                     # create it immediately and continue with the branches.
                     # Todo: Find a more elegant way to deal with this case
-                    _, target_bb_object = self.bb_extract(branch.target, parent_func_uuid, bb_object.UUID,
-                                                          branch.type.value)
+                    _, target_bb_object = self.bb_extract(branch.target, branch.type.value, context)
                 else:
                     # Must create correct representation of the existing BasicBlock
-                    target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, hash_exists,
-                                                                  parent_func_uuid, bb_object.UUID,
-                                                                  branch.type.value, back_edge=True)
+                    target_bb_object = BasicBlock.Neo4jBasicBlock(branch.target, hash_exists, branch.type.value,
+                                                                  context, back_edge=True)
 
                 relationship_exists = self.branch_rel_cache.get(target_bb_object.RELATIONSHIP_HASH)
 
@@ -173,16 +182,15 @@ class BinjaGraph:
 
         return outgoing_edges_list, bb_object
 
-    def instruction_extract(self, instruction, parent_bb_uuid: str, parent_instruction_uuid: str):
+    def instruction_extract(self, instruction, context: ContextManagement.Context):
         """
         :param instruction: BinaryNinja MLIL Instruction object
-        :param parent_bb_uuid: parent basic block UUID
-        :param parent_instruction_uuid
-        :return: (int): the UUID of the newly created instruction object
+        :param context
+        :return: (int): the UUID of the newly created RootInstruction object
         """
 
         instr_object = Instruction.Neo4jInstruction(instruction, self.uuid_generator.get_uuid(),
-                                                    parent_bb_uuid, parent_instruction_uuid)
+                                                    context)
 
         hash_exists = self.instruction_cache.get(instr_object.HASH)
         if not hash_exists:
@@ -190,26 +198,31 @@ class BinjaGraph:
             if not success:
                 print("Error writing Instruction object to CSV")
             else:
+                # Update Context and cache
+                context.RootInstruction = instr_object.UUID
+                context.RootExpression = instr_object.UUID
                 self.instruction_cache.update({instr_object.HASH: str(instr_object.UUID)})
-                # Each instruction is further extracted into an expression (a bit like an AST)
-                self.expression_extract(instruction, instr_object.UUID, 0, parent_node_type='Instruction')
+
+                # Each RootInstruction is further extracted into an RootExpression (a bit like an AST)
+                self.expression_extract(instruction, context, 0, parent_node_type='Instruction')
         else:
             instr_object = Instruction.Neo4jInstruction(instruction, hash_exists,
-                                                        parent_bb_uuid, parent_instruction_uuid)
+                                                        context)
             self.CSV_serializer.serialize_object(instr_object.serialize(), write_node=False, write_relationship=True)
 
         return instr_object.UUID
 
-    def expression_extract(self, instruction, parent_instruction_uuid, operand_index, parent_node_type='Expression'):
+    def expression_extract(self, instruction, context: ContextManagement.Context, operand_index,
+                           parent_node_type='Expression'):
         """
-        An expression is a breakdown of an MLIL instruction into its individual operands under a single operation
+        An RootExpression is a breakdown of an MLIL RootInstruction into its individual operands under a single operation
         :param instruction: BinaryNinja MLIL Insutrction object
-        :param parent_instruction_uuid: (STR)
-        :param operand_index: (INT) index of the expression within the parent instruction or expression operand list
-        :param parent_node_type: (STR) parent of an expression can be either an instruction or an expression
+        :param context
+        :param operand_index: (INT) index of the RootExpression within the parent RootInstruction or RootExpression operand list
+        :param parent_node_type: (STR) parent of an RootExpression can be either an RootInstruction or an RootExpression
         """
         expr_object = Expression.Neo4jExpression(instruction, self.uuid_generator.get_uuid(),
-                                                 parent_instruction_uuid, parent_node_type,
+                                                 context, parent_node_type,
                                                  operand_index)
 
         hash_exists = self.expression_cache.get(expr_object.HASH)
@@ -219,36 +232,39 @@ class BinjaGraph:
             if not success:
                 print("Error writing Expression object to CSV: ")
             else:
+                # Update context and cache
+                context.RootExpression = expr_object.UUID
                 self.expression_cache.update({expr_object.HASH: str(expr_object.UUID)})
 
-                index = 0
                 # Iterate the operand list according to the object types specified in the MLIL_Operations enum
+                index = 0
                 for op_description in instruction.ILOperations[instruction.operation]:
                     op_description_type = op_description[1]
 
                     if op_description_type == 'expr':
-                        self.expression_extract(instruction.operands[index], expr_object.UUID, index)
+                        self.expression_extract(instruction.operands[index], context, index)
                         index += 1
                         continue
                     if op_description_type == 'var':
                         self.var_extract(instruction.operands[index], self.uuid_generator.get_uuid(),
-                                         index, expr_object.UUID)
+                                         index, expr_object.UUID, context)
                         index += 1
                         continue
                     if op_description_type == 'expr_list':
-                        # TODO: support this op type - it is a list of parameters for the given expression
+                        # TODO: support this op type - it is a list of parameters for the given RootExpression
                         index += 1
                         continue
                     if op_description_type == 'var_list':
                         var_index = 0
                         for il_variable in instruction.operands[index]:
-                            self.var_extract(il_variable, self.uuid_generator.get_uuid(), var_index, expr_object.UUID)
+                            self.var_extract(il_variable, self.uuid_generator.get_uuid(), var_index, expr_object.UUID,
+                                             context)
                             var_index += 1
                         index += 1
                         continue
                     if op_description_type == 'int':
                         self.constant_extract(instruction.operands[index], self.uuid_generator.get_uuid(),
-                                              index, expr_object.UUID)
+                                              index, context)
                         index += 1
                         continue
                     if op_description_type == 'int_list':
@@ -257,7 +273,7 @@ class BinjaGraph:
                         continue
                     if op_description_type == 'float':
                         self.constant_extract(instruction.operands[index], self.uuid_generator.get_uuid(),
-                                              index, expr_object.UUID)
+                                              index, context)
                         index += 1
                         continue
                     if op_description_type == 'var_ssa':
@@ -285,19 +301,19 @@ class BinjaGraph:
         else:
             # Expression already exists, only create the relationship between the existing nodes
             expr_object = Expression.Neo4jExpression(instruction, hash_exists,
-                                                     parent_instruction_uuid, parent_node_type,
+                                                     context, parent_node_type,
                                                      operand_index)
             self.CSV_serializer.serialize_object(expr_object.serialize(), write_node=False, write_relationship=True)
 
-    def var_extract(self, var, uuid: str, index: int, parent_expr_uuid: str):
+    def var_extract(self, var, uuid: str, index: int, parent_expr_uuid: str, context:ContextManagement.Context):
         """
         :param var: BinaryNinja MLIL_VAR object
         :param uuid: UUID to give this VAR object within the CSV
-        :param index: operand index of this var within the parent expression operand list
+        :param index: operand index of this var within the parent RootExpression operand list
         :param parent_expr_uuid:
         """
 
-        var_object = Variable.Neo4jVar(var, uuid, index, parent_expr_uuid)
+        var_object = Variable.Neo4jVar(var, uuid, index, parent_expr_uuid, context)
         hash_exists = self.var_cache.get(var_object.HASH)
 
         if not hash_exists:
@@ -308,17 +324,17 @@ class BinjaGraph:
                 self.var_cache.update({var_object.HASH: str(var_object.UUID)})
         else:
             var_object = Variable.Neo4jVar(var, hash_exists,
-                                           index, parent_expr_uuid)
+                                           index, parent_expr_uuid, context)
             self.CSV_serializer.serialize_object(var_object.serialize(), write_node=False, write_relationship=True)
 
-    def constant_extract(self, constant, uuid: str, index: int, parent_expr_uuid: str):
+    def constant_extract(self, constant, uuid: str, index: int, context: ContextManagement.Context):
         """
         :param constant: A constant value (e.g "54343")
         :param uuid: UUID to assign to this constant
-        :param index: index of the constant within the parent expression operand list
-        :param parent_expr_uuid:
+        :param index: index of the constant within the parent RootExpression operand list
+        :param context
         """
-        const_object = Constant.Neo4jConstant(constant, uuid, index, parent_expr_uuid)
+        const_object = Constant.Neo4jConstant(constant, uuid, index, context)
         hash_exists = self.const_cache.get(const_object.HASH)
 
         if not hash_exists:
@@ -328,5 +344,5 @@ class BinjaGraph:
 
         else:
             const_object = Constant.Neo4jConstant(constant, hash_exists,
-                                                  index, parent_expr_uuid)
+                                                  index, context)
             self.CSV_serializer.serialize_object(const_object.serialize(), write_node=False, write_relationship=True)

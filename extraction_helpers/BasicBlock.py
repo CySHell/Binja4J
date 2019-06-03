@@ -7,16 +7,15 @@ import xxhash
 
 class Neo4jBasicBlock:
 
-    def __init__(self, bb, uuid: int, parent_func_uuid: str, parent_bb_uuid: str,
-                 branch_condition_enum: int, back_edge = False):
+    def __init__(self, bb, uuid: int, branch_condition_enum: int, context, back_edge=False):
         """
         Init the BasicBlock node
         """
         self.UUID = uuid
         self.bb = bb
         self.relationship_label = 'MemberBB' if not bb.incoming_edges else 'Branch'
-        self.parent_func_uuid = parent_func_uuid
-        self.parent_bb_uuid = parent_bb_uuid
+        self.context = context
+        self.parent_bb_uuid = context.RootBasicBlock if context.RootBasicBlock else context.RootFunction
         self.branch_condition_enum = branch_condition_enum
         self.NODE_HASH, self.RELATIONSHIP_HASH = self.bb_hash()
         self.BackEdge = back_edge
@@ -55,11 +54,13 @@ class Neo4jBasicBlock:
                 'EndNodeLabel': 'BasicBlock',
                 'BackEdge': self.BackEdge,
             },
+
+            'mandatory_context_dict': vars(self.context),
+
             'node_attributes': {
             },
             'relationship_attributes': {
                 'bb_offset': self.bb.start,
-                'ParentFunctionUUID': self.parent_func_uuid,
                 'bbRawOffset': self.bb.source_block.start
             },
         }

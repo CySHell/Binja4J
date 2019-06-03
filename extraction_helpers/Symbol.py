@@ -38,6 +38,11 @@ class Neo4jSymbol:
                 'EndNodeLabel': 'Symbol',
                 'BinaryViewUUID': self.binaryViewUUID,
             },
+
+            'mandatory_context_dict': {
+
+            },
+
             'node_attributes': {
                 'SymbolName': self.symbol.raw_name,
                 'SymbolTypeEnum': self.symbol.type.value,

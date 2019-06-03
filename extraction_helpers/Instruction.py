@@ -8,17 +8,18 @@ import xxhash
 
 class Neo4jInstruction:
 
-    def __init__(self, instr, uuid: int, parent_bb_uuid: str, parent_instruction_uuid: str):
+    def __init__(self, instr, uuid: int, context):
         self.UUID = uuid
         self.instr = instr
         self.HASH = self.instr_hash()
         self.operands = str(instr.operands)
-        self.parent_bb_uuid = parent_bb_uuid
-        self.parent_instruction_uuid = parent_instruction_uuid
-        if parent_bb_uuid == parent_instruction_uuid:
-            self.relationship_label = 'InstructionChain'
-        else:
+        self.context = context
+        self.parent_instruction_uuid = context.RootInstruction
+        if self.parent_instruction_uuid:
             self.relationship_label = 'NextInstruction'
+        else:
+            self.relationship_label = 'InstructionChain'
+            self.parent_instruction_uuid = context.RootBasicBlock
 
 
 
@@ -42,13 +43,13 @@ class Neo4jInstruction:
                 'StartNodeLabel': 'BasicBlock' if self.relationship_label is 'InstructionChain' else 'Instruction',
                 'EndNodeLabel': 'Instruction',
             },
+
+            'mandatory_context_dict': vars(self.context),
+
             'node_attributes': {
-                #'Operands': self.operands,
-                #'Operation': self.instr.operation
             },
             'relationship_attributes': {
                 'InstructionIndex': self.instr.instr_index,
-                'ParentBB': self.parent_bb_uuid,
                 'PossibleValues': self.instr.possible_values.type.value,
                 'VarsRead': [var.name for var in self.instr.vars_read],
                 'VarsWritten': [var.name for var in self.instr.vars_written],

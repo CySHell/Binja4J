@@ -55,6 +55,9 @@ class Neo4jBinaryView:
                 'StartNodeLabel': 'MemberBV',
                 'EndNodeLabel': 'MemberBV',
             },
+            'mandatory_context_dict': {
+                # Stub, not used with BinaryView
+            },
             'node_attributes': {
                 'FILENAME': self.FILENAME,
                 'Architecture': self.bv.arch.name,

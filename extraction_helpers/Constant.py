@@ -8,12 +8,13 @@ import xxhash
 
 class Neo4jConstant:
 
-    def __init__(self, constant, uuid, operand_index: int, parent_expr_uuid: str):
+    def __init__(self, constant, uuid, operand_index: int, context):
         self.UUID = uuid
         self.constant = constant
         self.operand_index = operand_index
-        self.parent_expr_uuid = parent_expr_uuid
+        self.parent_expr_uuid = context.RootExpression
         self.HASH = self.constant_hash()
+        self.context = context
 
     def constant_hash(self):
         constant_hash = xxhash.xxh64()
@@ -36,6 +37,9 @@ class Neo4jConstant:
                 'StartNodeLabel': 'Expression',
                 'EndNodeLabel': 'Constant',
             },
+
+            'mandatory_context_dict': vars(self.context),
+
             'node_attributes': {
                 'ConstType': type(self.constant)
 

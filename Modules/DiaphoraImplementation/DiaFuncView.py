@@ -5,15 +5,15 @@ import Configuration
 class DiaFunc:
     # This class is the main object that all heuristics will work with.
     # This class has 2 main functions:
-    #   1. obtain (from a neo4j DB) and represent all relevant information regarding a function, in order to allow
+    #   1. obtain (from a neo4j DB) and represent all relevant information regarding a RootFunction, in order to allow
     #      efficient similarity testing.
-    #   2. Populate a neo4j DB function object with a special node (node label: "DiaFuncInfo", relationship type: "Dia")
+    #   2. Populate a neo4j DB RootFunction object with a special node (node label: "DiaFuncInfo", relationship type: "Dia")
     #      that holds the information needed for future uses of this class.
 
     def __init__(self, driver, func_uuid: str, usage: str):
         """
         :param driver: neo4j DB bolt driver object, used for communicating with the relevant DB
-        :param func_uuid: (STR) the UUID of the function node in the neo4j DB
+        :param func_uuid: (STR) the UUID of the RootFunction node in the neo4j DB
         :param usage: (STR) Does this object 'Obtain' info from the DB, or 'Populate' the DB with new info
         """
         self.driver = driver
@@ -51,13 +51,13 @@ class DiaFunc:
         # needed for future uses of this class.
         # Connect this node to the actual Function node (MLIL Function) that it represents
         with self.driver.session() as session:
-            # Get information from the function node properties
+            # Get information from the RootFunction node properties
             self.populate_from_node_properties()
 
-            # Get information regarding the graph structure of the function
+            # Get information regarding the graph structure of the RootFunction
             self.populate_graph_related_attributes()
 
-            # Get all symbols from this function
+            # Get all symbols from this RootFunction
             self.populate_strings()
 
             self.populate_symbols()
@@ -66,7 +66,7 @@ class DiaFunc:
 
     def populate_from_node_properties(self):
         with self.driver.session() as session:
-            # Get information from the function node properties
+            # Get information from the RootFunction node properties
             node_properties = session.run("MATCH (f:Function {UUID: '" + self.func_uuid + "'}) return properties(f)")
             node_properties = node_properties.peek()[0]
             self.calling_convention = node_properties['CallingConvention']
@@ -75,7 +75,7 @@ class DiaFunc:
 
     def populate_graph_related_attributes(self):
         with self.driver.session() as session:
-            # Get information regarding the graph structure of the function
+            # Get information regarding the graph structure of the RootFunction
             test = session.run("MATCH (:BasicBlock)-[r:Branch {ParentFunctionUUID: \"" + self.func_uuid +
                                "\"}]->(end:BasicBlock) "
                                "RETURN count(DISTINCT(end)) as vertices_count, count(DISTINCT(r)) as edges_count ")
@@ -90,13 +90,13 @@ class DiaFunc:
                                                        "WITH collect(bb) as bb_list "
                                                        "UNWIND bb_list as basicBlock "
                                                        "MATCH ()-[:InstructionChain|:NextInstruction "
-                                                       "{ParentBB: basicBlock.UUID}]->(instruction:Instruction) "
-                                                       "WITH collect(instruction) as instruction_list "
+                                                       "{ParentBB: basicBlock.UUID}]->(RootInstruction:Instruction) "
+                                                       "WITH collect(RootInstruction) as instruction_list "
                                                        "UNWIND instruction_list as instr "
                                                        "MATCH (instr)-[:Operand*1..3]-(exp:Expression) "
                                                        "WITH collect(exp) as expression_list "
-                                                       "UNWIND expression_list as expression "
-                                                       "MATCH (expression)-[:ConstantOperand]->(const:Constant) "
+                                                       "UNWIND expression_list as RootExpression "
+                                                       "MATCH (RootExpression)-[:ConstantOperand]->(const:Constant) "
                                                        "WITH collect(const) as constant_list "
                                                        "MATCH (bv:BinaryView)-[:MemberFunc]->"
                                                        "                      (:Function {UUID: \'" + self.func_uuid + "\'})"
@@ -105,7 +105,7 @@ class DiaFunc:
                                                        "MATCH (:Constant)-[:StringRef {BinaryViewUUID: bv.UUID}]->(string)"
                                                        "RETURN collect(string) as strList").single().value()
 
-            # Each string is a String Neo4j node object within the current function
+            # Each string is a String Neo4j node object within the current RootFunction
             for string in string_list:
                 string_dict.update({string['HASH']: string['RawData']})
 
@@ -119,13 +119,13 @@ class DiaFunc:
                                                        "WITH collect(bb) as bb_list "
                                                        "UNWIND bb_list as basicBlock "
                                                        "MATCH ()-[:InstructionChain|:NextInstruction "
-                                                       "{ParentBB: basicBlock.UUID}]->(instruction:Instruction) "
-                                                       "WITH collect(instruction) as instruction_list "
+                                                       "{ParentBB: basicBlock.UUID}]->(RootInstruction:Instruction) "
+                                                       "WITH collect(RootInstruction) as instruction_list "
                                                        "UNWIND instruction_list as instr "
                                                        "MATCH (instr)-[:Operand*1..3]-(exp:Expression) "
                                                        "WITH collect(exp) as expression_list "
-                                                       "UNWIND expression_list as expression "
-                                                       "MATCH (expression)-[:ConstantOperand]->(const:Constant) "
+                                                       "UNWIND expression_list as RootExpression "
+                                                       "MATCH (RootExpression)-[:ConstantOperand]->(const:Constant) "
                                                        "WITH collect(const) as constant_list "
                                                        "MATCH (bv:BinaryView)-[:MemberFunc]->"
                                                        "                      (:Function {UUID: \'" + self.func_uuid + "\'})"
@@ -134,7 +134,7 @@ class DiaFunc:
                                                        "MATCH (:Constant)-[:SymbolRef {BinaryViewUUID: bv.UUID}]->(symbol)"
                                                        "RETURN collect(symbol) as symbolList").single().value()
 
-            # Each symbol is a Symbol Neo4j node object within the current function
+            # Each symbol is a Symbol Neo4j node object within the current RootFunction
             for symbol in symbol_list:
                 symbol_dict.update({symbol['HASH']: symbol['SymbolName']})
 

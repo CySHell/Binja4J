@@ -38,6 +38,11 @@ class Neo4jString:
                 'EndNodeLabel': 'String',
                 'BinaryViewUUID': self.binaryViewUUID,
             },
+
+            'mandatory_context_dict': {
+
+            },
+
             'node_attributes': {
                 'RawString': str(self.raw_string).strip(),
             },
