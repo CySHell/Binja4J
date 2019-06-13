@@ -6,50 +6,50 @@ class CSV_Serialize:
 
     def __init__(self):
 
-        self.BinaryView = open(Configuration.path + 'BinaryView-nodes.csv', 'w+', buffering=1, encoding='utf-8',
+        self.BinaryView = open(Configuration.analysis_database_path + 'BinaryView-nodes.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.Function = open(Configuration.path + 'Functions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
+        self.Function = open(Configuration.analysis_database_path + 'Functions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
                              newline='')
-        self.BasicBlock = open(Configuration.path + 'BasicBlocks-nodes.csv', 'w+', buffering=1, encoding='utf-8',
+        self.BasicBlock = open(Configuration.analysis_database_path + 'BasicBlocks-nodes.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.Instruction = open(Configuration.path + 'Instructions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
+        self.Instruction = open(Configuration.analysis_database_path + 'Instructions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
                                 newline='')
-        self.Expression = open(Configuration.path + 'Expressions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
+        self.Expression = open(Configuration.analysis_database_path + 'Expressions-nodes.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.Variable = open(Configuration.path + 'Variables-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
-        self.MemberFunc = open(Configuration.path + 'MemberFunc-relationships.csv', 'w+', buffering=1, encoding='utf-8',
+        self.Variable = open(Configuration.analysis_database_path + 'Variables-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.MemberFunc = open(Configuration.analysis_database_path + 'MemberFunc-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.MemberBB = open(Configuration.path + 'MemberBB-relationships.csv', 'w+', buffering=1, encoding='utf-8',
+        self.MemberBB = open(Configuration.analysis_database_path + 'MemberBB-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                              newline='')
-        self.Branch = open(Configuration.path + 'Branch-relationships.csv', 'w+', buffering=1, encoding='utf-8',
+        self.Branch = open(Configuration.analysis_database_path + 'Branch-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                            newline='')
-        self.InstructionChain = open(Configuration.path + 'InstructionChain-relationships.csv', 'w+', buffering=1,
+        self.InstructionChain = open(Configuration.analysis_database_path + 'InstructionChain-relationships.csv', 'w+', buffering=1,
                                      encoding='utf-8', newline='')
-        self.NextInstruction = open(Configuration.path + 'NextInstruction-relationships.csv', 'w+', buffering=1,
+        self.NextInstruction = open(Configuration.analysis_database_path + 'NextInstruction-relationships.csv', 'w+', buffering=1,
                                     encoding='utf-8', newline='')
-        self.Operand = open(Configuration.path + 'Operand-relationships.csv', 'w+', buffering=1, encoding='utf-8',
+        self.Operand = open(Configuration.analysis_database_path + 'Operand-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                             newline='')
-        self.VarOperand = open(Configuration.path + 'VarOperand-relationships.csv', 'w+', buffering=1, encoding='utf-8',
+        self.VarOperand = open(Configuration.analysis_database_path + 'VarOperand-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                                newline='')
-        self.MemberBV = open(Configuration.path + 'MemberBV-relationships.csv', 'w+', buffering=1, encoding='utf-8',
+        self.MemberBV = open(Configuration.analysis_database_path + 'MemberBV-relationships.csv', 'w+', buffering=1, encoding='utf-8',
                              newline='')
-        self.ConstantOperand = open(Configuration.path + 'ConstantOperand-relationships.csv', 'w+', buffering=1,
+        self.ConstantOperand = open(Configuration.analysis_database_path + 'ConstantOperand-relationships.csv', 'w+', buffering=1,
                                     encoding='utf-8', newline='')
-        self.Constant = open(Configuration.path + 'Constant-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.Constant = open(Configuration.analysis_database_path + 'Constant-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.String = open(Configuration.path + 'String-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.String = open(Configuration.analysis_database_path + 'String-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.Symbol = open(Configuration.path + 'Symbol-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.Symbol = open(Configuration.analysis_database_path + 'Symbol-nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.StringRef = open(Configuration.path + 'StringRef-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.StringRef = open(Configuration.analysis_database_path + 'StringRef-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.SymbolRef = open(Configuration.path + 'SymbolRef-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.SymbolRef = open(Configuration.analysis_database_path + 'SymbolRef-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.FunctionCall = open(Configuration.path + 'FunctionCall-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.FunctionCall = open(Configuration.analysis_database_path + 'FunctionCall-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.DefinedAt = open(Configuration.path + 'DefinedAt-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.DefinedAt = open(Configuration.analysis_database_path + 'DefinedAt-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
-        self.UsedAt = open(Configuration.path + 'UsedAt-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+        self.UsedAt = open(Configuration.analysis_database_path + 'UsedAt-relationships.csv', 'w+', buffering=1, encoding='utf-8', newline='')
 
         self.types = {
             'BinaryView': self.BinaryView, 'Function': self.Function, 'BasicBlock': self.BasicBlock,

@@ -13,7 +13,7 @@ from . import Configuration
 def main(bv):
     start_time = time.time()
 
-    driver = GraphDatabase.driver(Configuration.uri, auth=(Configuration.user, Configuration.password))
+    driver = GraphDatabase.driver(Configuration.analysis_database_uri, auth=(Configuration.analysis_database_user, Configuration.analysis_database_password))
 
     uuid_obj = UUID_Generator.UUID(driver)
 

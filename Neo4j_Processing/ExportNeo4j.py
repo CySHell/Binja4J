@@ -5,7 +5,8 @@ import csv
 import time
 import Configuration
 
-driver = GraphDatabase.driver(Configuration.uri, auth=(Configuration.user, Configuration.password),
+driver = GraphDatabase.driver(Configuration.analysis_database_uri,
+                              auth=(Configuration.analysis_database_user, Configuration.analysis_database_password),
                               max_connection_lifetime=60, max_connection_pool_size=1000,
                               connection_acquisition_timeout=30)
 
@@ -45,7 +46,7 @@ def create_relationships(filename):
     batch_rows = [[] for _ in range(Configuration.THREAD_COUNT)]
     batch_index = 0
     thread_list = []
-    with open(Configuration.path + filename, 'r') as fn:
+    with open(Configuration.analysis_database_path + filename, 'r') as fn:
         for row in csv.DictReader(fn):
             batch_rows[batch_index].append(row)
 
@@ -144,11 +145,11 @@ if __name__ == "__main__":
     # and other multi-threading plagues.
 
     if not BinaryViewExists():
-        for root, dirs, files in os.walk(Configuration.path):
+        for root, dirs, files in os.walk(Configuration.analysis_database_path):
             for filename in files:
                 if filename.endswith('-nodes.csv'):
                     create_nodes(filename)
-        for root, dirs, files in os.walk(Configuration.path):
+        for root, dirs, files in os.walk(Configuration.analysis_database_path):
             for filename in files:
                 if filename.endswith('-relationships.csv'):
                     create_relationships(filename)

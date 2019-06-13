@@ -142,7 +142,7 @@ class DiaFunc:
 
 
 if __name__ == "__main__":
-    driver = GraphDatabase.driver(Configuration.uri, auth=(Configuration.user, Configuration.password),
+    driver = GraphDatabase.driver(Configuration.analysis_database_uri, auth=(Configuration.analysis_database_user, Configuration.analysis_database_password),
                                   max_connection_lifetime=60, max_connection_pool_size=1000,
                                   connection_acquisition_timeout=30)
     df = DiaFunc(driver, 'fb1a0415-cb75-46c3-bb43-39055ec8c370', 'Populate')
