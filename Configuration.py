@@ -1,6 +1,6 @@
 # PATH to the import directory of the activated Neo4j DB, e.g:
 
-analysis_database_path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-a5cab528-5b2d-4309-8160-2d79d0799193\\installation-3.5.6\\import\\'
+analysis_database_path = 'C:\\Users\\user\\.Neo4jDesktop\\neo4jDatabases\\database-6b4cd588-3bec-4fe3-ad3f-08d9e7beef6e\\installation-3.5.6\\import\\'
 
 # Credentials for the Neo4j DB to store all the information in
 

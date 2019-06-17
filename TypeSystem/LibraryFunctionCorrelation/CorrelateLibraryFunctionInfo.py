@@ -1,5 +1,5 @@
-# This module is responsible for correlating library function information obtained through Header Parsing into
-# the library functions found in the examined binary in the main DB
+# This module contains helper functions for correlating library function information obtained through Header Parsing
+# into the library functions found in the examined binary view within BinaryNinja
 
 from binaryninja import *
 import Configuration
@@ -17,7 +17,7 @@ def correlate_entire_binary_view():
         func_name = func.name
         type_definition = dict()
         if not (func_name.startswith('sub_')):
-            type_definition = NodeHandlers.get_function_definitions(func_name)
+            type_definition = NodeHandlers.get_type_definition(func_name)
 
         if type_definition:
             function_correlate(type_definition)
@@ -44,8 +44,11 @@ def function_correlate(type_definition, key):
 
     function_type = Type.function(return_type, func_params)
 
-    current_function.set_user_type(function_type)
-
+    try:
+        current_function.set_user_type(function_type)
+    except:
+        print("Failed to set user type for function: ", function_type)
+        return False
 
 def get_type_object(type_definition, key)
     # Dispatch the correct method for parsing the specific type (typedef \ struct \ union \ enum)
@@ -58,6 +61,8 @@ def get_type_object(type_definition, key)
         return enum_correlate(type_definition, key)
     if type_definition_field == 'Struct':
         return struct_correlate(type_definition, key)
+    if type_definition_field == 'PointerTo':
+        return pointer_correlate(type_definition, key)
     if type_definition_field == 'Union' or type_name_field == 'AnonymousUnion':
         return union_correlate(type_definition, key)
 
@@ -75,7 +80,10 @@ def struct_correlate(type_definition, key):
         field_type = get_type_object(type_definition, struct_field_hash)
         struct.append(field_type, type_definition[struct_field_hash][0][1])
 
-    bv.define_user_type(type_definition[key][0][1], types.Type.structure_type(struct))
+    try:
+        bv.define_user_type(type_definition[key][0][1], types.Type.structure_type(struct))
+    except:
+        return False
 
     return bv.get_type_by_name(type_definition[key][0][1])
 
@@ -97,11 +105,16 @@ def union_correlate(type_definition, key):
     union_name = type_definition[key][0][0].split().split('::') if type_definition[key][0][1] == 'AnonymousUnion' \
                  else type_definition[key][0][1]
 
-    bv.define_user_type(union_name, types.Type.structure_type(struct))
+    try:
+        bv.define_user_type(union_name, types.Type.structure_type(struct))
+    except:
+        return False
 
     return bv.get_type_by_name(type_definition[key][0][1])
 
 def anonymous_struct_correlate(type_definition, key):
+
+
 
 def enum_correlate(type_definition, key):
     # type_definition[key] =
@@ -121,6 +134,14 @@ def enum_correlate(type_definition, key):
 
     return bv.get_type_by_name(type_definition[key][0][1])
 
+
+def pointer_correlate(type_definition, key):
+    # type_definition[key] =
+    # [('PointerTo', 'const unsigned char *'), ['sub_type_hash']]
+
+    return get_type_object(type_definition, type_definition[key][1][0])
+
+
 def typedef_correlate(type_definition, key):
     # type_definition[key] =
     # [('HANDLE', 'hFile'), ['sub_type_hash']]
@@ -129,7 +150,7 @@ def typedef_correlate(type_definition, key):
         if not get_type_object(type_definition, sub_type_hash):
             return False
 
-    var_type, name = bv.parse_type_string(type_definition[key][0] + type_definition[key][1])
+    var_type, name = bv.parse_type_string("typedef " + type_definition[key][0] + " " + type_definition[key][1])
 
     try:
         bv.define_user_type(name, var_type)

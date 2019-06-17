@@ -1,8 +1,11 @@
 from clang.cindex import *
-from py2neo import *
+from neo4j import GraphDatabase
+from Common import GraphNodeInformation
 import xxhash
 import time
 import threading
+import csv
+import Configuration
 
 #########################################################################
 #                                                                       #
@@ -15,17 +18,40 @@ MAX_THREADS = 8
 
 #########################################################################
 #                                                                       #
-#       Neo4j DB session creation                                       #
+#       Init driver for neo4j DB                                        #
 #                                                                       #
 #########################################################################
 
-# Create a session with the started local Neo4j DB, using the analysis_database_password 'user'. for more info on
-# param search for py2neo.Graph()
-graph = Graph(password='user')
+driver = GraphDatabase.driver(Configuration.analysis_database_uri,
+                              auth=(Configuration.analysis_database_user, Configuration.analysis_database_password),
+                              max_connection_lifetime=60, max_connection_pool_size=1000,
+                              connection_acquisition_timeout=30)
 
+#########################################################################
+#                                                                       #
+#       csv files creation                                              #
+#                                                                       #
+#########################################################################
 
-# uncomment this line to delete the graph before each run of the script (good for testing purposes)
-# graph.delete_all()
+nodes_csv = open(Configuration.analysis_database_path + 'nodes.csv', 'w+', buffering=1, encoding='utf-8', newline='')
+relationships_csv = open(Configuration.analysis_database_path + 'relationships.csv', 'w+', buffering=1,
+                         encoding='utf-8', newline='')
+
+nodes_csv_dict_writer = csv.DictWriter(nodes_csv, fieldnames=['TypeDefinition', 'TypeName', 'NodeLabel', 'Hash'])
+nodes_csv_dict_writer.writeheader()
+relationships_csv_dict_writer = csv.DictWriter(relationships_csv, fieldnames=['StartNodeHash', 'EndNodeHash',
+                                                                              'RelationshipType'])
+relationships_csv_dict_writer.writeheader()
+
+#########################################################################
+#                                                                       #
+#       Cache init                                                      #
+#                                                                       #
+#########################################################################
+
+nodes_cache = dict()  # {Hash: (TypeDefinition, TypeName, NodeLabel)}
+# Relationship Cache is a set of strings representing each relationship
+relationships_cache = set()  # {str(StartNodeHash + EndNodeHash + RelationshipType), ..,str(...)}
 
 
 #########################################################################
@@ -34,36 +60,46 @@ graph = Graph(password='user')
 #                                                                       #
 #########################################################################
 
-def is_recursive_definition(node):
-    """ Search for a circular definition of a type """
-    relationship_count = graph.run(
-        'MATCH analysis_database_path = (n)-[r*]->(n) where n.type_name = {TYPE_NAME} AND '
-        'n.type_definition = {TYPE_DEFINITION} '
-        'RETURN size(relationships(analysis_database_path))', TYPE_NAME=node['type_name'],
-        TYPE_DEFINITION=node['type_definition'])
 
-    return int(relationship_count.evaluate() or 0) > 0
+def is_recursive_definition(start_node_hash, end_node_hash, relationship_type):
+    """ Search for a circular definition of a type """
+    relationship_hash = start_node_hash + " " + end_node_hash + " " + relationship_type
+    if relationship_hash in relationships_cache:
+        return True
+    return False
 
 
 #########################################################################
 
-def merge_node(parent_node, relationship, node_label, **kwargs):
-    """ Create the actual node\relationship in the Neo4j graph """
-    if kwargs['type_name'] is None:
-        kwargs['type_name'] = 'None'
-
-    str_to_digest = str(kwargs['type_name']) + str(kwargs['type_definition'])
+def get_node_hash(kwargs):
+    str_to_digest = str(kwargs['TypeName']) + str(kwargs['TypeDefinition'])
     xxhash_obj = xxhash.xxh64()
     xxhash_obj.update(str_to_digest)
-    kwargs['HASH'] = xxhash_obj.hexdigest()
 
-    current_node = Node(node_label, **kwargs)
-    current_relationship = Relationship(parent_node, relationship, current_node)
+    return xxhash_obj.hexdigest()
 
-    graph.merge(current_node, node_label, 'HASH')
-    graph.merge(current_relationship, relationship)
 
-    return current_node
+#########################################################################
+
+def merge_node(**kwargs):
+    """
+    Create the actual node\relationship in the csv.
+    Two csv files exist: nodes.csv and relationships.csv .
+    - nodes.csv has the format: <TypeDefinition>, <TypeName>, <NodeLabel>, <Hash>
+    - relationships.csv has the format: <start node hash>, <end node hash>, <relationship type>
+    """
+
+    if kwargs['TypeName'] is None:
+        kwargs['TypeName'] = 'None'
+
+    kwargs['Hash'] = get_node_hash(kwargs)
+
+    if not nodes_cache.get(kwargs['Hash']):
+        nodes_cache.update({kwargs['Hash']: (kwargs['TypeDefinition'], kwargs['TypeName'], kwargs['NodeLabel'])})
+    if kwargs['StartNodeHash'] != kwargs['Hash']:
+        relationships_cache.add(kwargs['StartNodeHash'] + " " + kwargs['Hash'] + " " + kwargs['RelationshipType'])
+
+    return kwargs['Hash']
 
 
 #########################################################################
@@ -77,86 +113,91 @@ def merge_node(parent_node, relationship, node_label, **kwargs):
 """ 
 Each type handler deals with a specific clang AST type
 :param type: clang.cindex.Type object
-:param parent_node: py2neo.Node object , represents the parent of the current type node
-:param relationship: str , determines the relationship label of the neo2py.Relationship object that will be created
+:param parent_node_hash: represents the parent of the current type node
+:param relationship_type
 """
 
 
-def handle_base_type(type, parent_node, relationship):
+def handle_base_type(type, parent_node_hash, relationship_type):
     args = {
-        'type_name': type.spelling,
-        'type_definition': str(type.kind).split('.')[1],
-        'Size': type.get_size()
+        'TypeName': str(type.kind).split('.')[1],
+        'TypeDefinition': type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': 'ReturnType' if relationship_type == 'ReturnType' else 'BaseTypeDefinition',
+        'NodeLabel': 'BaseType',
     }
 
-    if type.spelling == 'VOID':
-        args['Size'] = None
-    merge_node(parent_node, relationship, 'Base_Type', **args)
+    merge_node(**args)
 
 
 #########################################################################
 
-def handle_constant_array(type, parent_node, relationship):
+def handle_constant_array(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.CONSTANTARRAY
 
     args = {
-        'type_name': type.spelling,
-        'type_definition': type.element_type.spelling,
-        'array_element_count': type.element_count,
-        'Size': type.element_type.get_size() * type.element_count
+        'TypeName': type.spelling,
+        'TypeDefinition': type.element_type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(type.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(type.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[type.element_type.kind](type.element_type, current_node, relationship)
+    type_handles[type.element_type.kind](type.element_type, current_node_hash, 'ArrayMember')
 
 
 #########################################################################
 
 
-def handle_record(type, parent_node, relationship):
+def handle_record(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.RECORD
 
-    cursor_handles[type.get_declaration().kind](type.get_declaration(), parent_node, relationship)
+    cursor_handles[type.get_declaration().kind](type.get_declaration(), parent_node_hash, relationship_type)
 
 
 #########################################################################
 
-def handle_typedef(type, parent_node, relationship):
+def handle_typedef(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.TYPEDEF
 
-    cursor_handles[type.get_declaration().kind](type.get_declaration(), parent_node, relationship)
+    cursor_handles[type.get_declaration().kind](type.get_declaration(), parent_node_hash, relationship_type)
 
 
 #########################################################################
 
-def handle_pointer(type, parent_node, relationship):
+def handle_pointer(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.POINTER or type.kind == TypeKind.LVALUEREFERENCE or \
            type.kind == TypeKind.RVALUEREFERENCE
 
     args = {
-        'type_name': type.spelling,
-        'type_definition': 'PointerTo',
-        'Size': type.get_size()
+        'TypeName': type.spelling,
+        'TypeDefinition': 'PointerTo',
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(type.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(type.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[type.get_pointee().kind](type.get_pointee(), current_node, 'PointerTo')
+    type_handles[type.get_pointee().kind](type.get_pointee(), current_node_hash, 'PointerTo')
 
 
 #########################################################################
 
-def handle_unexposed(type, parent_node, relationship):
+def handle_unexposed(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.UNEXPOSED
 
     args = {
-        'type_name': type.spelling,
-        'type_definition': 'UNEXPOSED_TYPE',
-        'Size': type.get_size()
+        'TypeName': type.spelling,
+        'TypeDefinition': 'UnexposedType',
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': 'UnKnown',
+        'NodeLabel': str(type.kind).split('.')[1],
     }
 
-    merge_node(parent_node, relationship, str(type.kind).split('.')[1], **args)
+    merge_node(**args)
 
 
 #########################################################################
@@ -169,62 +210,67 @@ def handle_enum(type, parent_node, relationship):
 
 #########################################################################
 
-def handle_function_proto(type, parent_node, relationship):
+def handle_function_proto(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.FUNCTIONPROTO
 
     args = {
-        'type_name': type.spelling,
-        'type_definition': type.spelling.split('__attribute__')[0],
-        'Size': POINTER_SIZE['x64'],
-        'function_argument_list': [str(i.spelling) for i in type.argument_types()]
+        'TypeName': type.spelling,
+        'TypeDefinition': type.spelling.split('__attribute__')[0],
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(type.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(type.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[type.get_result().kind](type.get_result(), current_node, 'Return_Type')
+    type_handles[type.get_result().kind](type.get_result(), current_node_hash, 'ReturnType')
 
     for argument in type.argument_types():
-        type_handles[argument.kind](argument, current_node, 'Function_Argument')
+        type_handles[argument.kind](argument, current_node_hash, 'Function_Argument')
 
 
 #########################################################################
 
-def handle_function_no_proto(type, parent_node, relationship):
+def handle_function_no_proto(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.FUNCTIONNOPROTO
 
     args = {
-        'type_name': type.spelling,
-        'type_definition': 'FUNCTIONNOPROTO',
-        'Size': POINTER_SIZE['x64'],
+        'TypeName': type.spelling,
+        'TypeDefinition': 'FUNCTIONNOPROTO',
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(type.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(type.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[type.get_result().kind](type.get_result(), current_node, 'Return_Type')
+    type_handles[type.get_result().kind](type.get_result(), current_node_hash, 'ReturnType')
 
 
 #########################################################################
 
-def handle_elaborated(type, parent_node, relationship):
+def handle_elaborated(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.ELABORATED
 
-    cursor_handles[type.get_declaration().kind](type.get_declaration(), parent_node, relationship)
+    cursor_handles[type.get_declaration().kind](type.get_declaration(), parent_node_hash, relationship_type)
 
 
 #########################################################################
 
-def handle_incomplete_array(type, parent_node, relationship):
+def handle_incomplete_array(type, parent_node_hash, relationship_type):
     assert type.kind == TypeKind.INCOMPLETEARRAY
 
     args = {
-        'type_name': type.spelling,
-        'type_definition': type.element_type.spelling,
-        'Size': type.get_size()
+        'TypeName': type.spelling,
+        'TypeDefinition': type.element_type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(type.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(type.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[type.element_type.kind](type.element_type, current_node, "Type_definition")
+    type_handles[type.element_type.kind](type.element_type, current_node_hash, "ArrayElement")
 
 
 #########################################################################
@@ -243,124 +289,145 @@ Each cursor handler deals with a specific clang AST type
 """
 
 
-def cursor_handle_typedef_decl(cursor, parent_node, relationship):
+def cursor_handle_typedef_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.TYPEDEF_DECL
 
     args = {
-        'type_name': cursor.spelling,
-        'type_definition': cursor.underlying_typedef_type.spelling
+        'TypeName': cursor.spelling,
+        'TypeDefinition': cursor.underlying_typedef_type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
     underlying_typedef = cursor.underlying_typedef_type
 
-    type_handles[underlying_typedef.kind](underlying_typedef, current_node, 'Type_Definition')
+    type_handles[underlying_typedef.kind](underlying_typedef, current_node_hash, 'TypeDef')
 
 
 #########################################################################
 
-def cursor_handle_field_decl(cursor, parent_node, relationship):
+def cursor_handle_field_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.FIELD_DECL
 
-    type_handles[cursor.type.kind](cursor.type, parent_node, 'Type_Definition')
+    type_handles[cursor.type.kind](cursor.type, parent_node_hash, 'FieldDef')
 
 
 #########################################################################
 
-def cursor_handle_parm_decl(cursor, parent_node, relationship):
+def cursor_handle_parm_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.PARM_DECL
 
     args = {
-        'type_name': cursor.spelling,
-        'type_definition': cursor.type.spelling
+        'TypeName': cursor.spelling,
+        'TypeDefinition': cursor.type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[cursor.type.kind](cursor.type, current_node, 'Type_Definition')
+    type_handles[cursor.type.kind](cursor.type, current_node_hash, 'FunctionParamDef')
 
 
 #########################################################################
 
-def cursor_handle_struct_decl(cursor, parent_node, relationship):
+def cursor_handle_struct_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.STRUCT_DECL
 
     args = {
-        'type_name': 'AnonymousStruct' if cursor.is_anonymous() else cursor.spelling,
-        'type_definition': 'Struct'
+        'TypeName': (cursor.type.spelling.split()[1].split('::')[0] + '_AnonymousStruct') if cursor.is_anonymous()
+        else cursor.spelling,
+        'TypeDefinition': 'Struct',
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
-
-    if not (is_recursive_definition(current_node)):
-        field_index = 0
+    if not is_recursive_definition(args['StartNodeHash'], get_node_hash(args), args['RelationshipType']):
+        current_node_hash = merge_node(**args)
         for field in cursor.type.get_fields():
-            field_node = merge_node(current_node, 'Struct_Field', 'Struct_Field_DECL',
-                                    **{'type_name': field.spelling, 'type_definition': field.type.spelling,
-                                       'field_index': field_index})
-            field_index += 1
-            cursor_handles[field.kind](field, field_node, 'Type_Definition')
+            args = {
+                'TypeName': field.spelling,
+                'TypeDefinition': field.type.spelling,
+                'StartNodeHash': current_node_hash,
+                'RelationshipType': 'FieldDef',
+                'NodeLabel': 'StructFieldDecl',
+            }
+            field_node_hash = merge_node(**args)
+            cursor_handles[field.kind](field, field_node_hash, 'FieldDef')
 
 
 #########################################################################
 
-def cursor_handle_function_decl(cursor, parent_node, relationship):
+def cursor_handle_function_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.FUNCTION_DECL
 
     args = {
-        'type_name': cursor.spelling,
-        'type_definition': cursor.type.spelling,
-        'function_argument_list': [str(i.spelling) for i in cursor.get_arguments()]
+        'TypeName': cursor.spelling,
+        'TypeDefinition': cursor.type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[cursor.result_type.kind](cursor.result_type, current_node, 'Return_Type')
+    type_handles[cursor.result_type.kind](cursor.result_type, current_node_hash, 'ReturnType')
 
     for arg in cursor.get_arguments():
-        cursor_handles[arg.kind](arg, current_node, 'Function_Argument')
+        cursor_handles[arg.kind](arg, current_node_hash, 'FunctionArgument')
 
 
 #########################################################################
 
-def cursor_handle_union_decl(cursor, parent_node, relationship):
+def cursor_handle_union_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.UNION_DECL
 
     args = {
-        'type_name': 'AnonymousUnion' if cursor.is_anonymous() else cursor.spelling,
-        'type_definition': cursor.type.spelling
+        'TypeName': (cursor.type.spelling.split()[1].split('::')[0] + '_AnonymousUnion') if cursor.is_anonymous()
+        else cursor.spelling,
+        'TypeDefinition': cursor.type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
     for field in cursor.type.get_fields():
-        cursor_handles[field.kind](field, current_node, relationship)
+        cursor_handles[field.kind](field, current_node_hash, 'UnionField')
 
 
 #########################################################################
 
-def cursor_handle_type_ref(cursor, parent_node, relationship):
+def cursor_handle_type_ref(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.TYPE_REF
 
-    graph[cursor.type.kind] = cursor.type.spelling
+    print("Reached a type_ref, parent node hash is: ", parent_node_hash)
 
-    type_handles[cursor.type.kind](cursor.type, parent_node, relationship)
+    type_handles[cursor.type.kind](cursor.type, parent_node_hash, 'TypeRef')
 
 
 #########################################################################
 
-def cursor_handle_var_decl(cursor, parent_node, relationship):
+def cursor_handle_var_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.VAR_DECL
 
     args = {
-        'type_name': cursor.spelling,
-        'type_definition': cursor.type.spelling
+        'TypeName': cursor.spelling,
+        'TypeDefinition': cursor.type.spelling,
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
-    type_handles[cursor.type.kind](cursor.type, current_node, 'Type_Definition')
+    type_handles[cursor.type.kind](cursor.type, current_node_hash, 'VariableDef')
 
 
 #########################################################################
@@ -371,29 +438,31 @@ def cursor_handle_do_nothing(cursor, parent_node, relationship):
     pass
 
 
-#    print('unexposed declaration, location:', cursor.location)
-
-
 #########################################################################
 
 
-def cursor_handle_enum_decl(cursor, parent_node, relationship):
+def cursor_handle_enum_decl(cursor, parent_node_hash, relationship_type):
     assert cursor.kind == CursorKind.ENUM_DECL
 
     args = {
-        'type_name': cursor.type.spelling,
-        'type_definition': 'ENUM'
+        'TypeName': cursor.type.spelling,
+        'TypeDefinition': 'Enumeration',
+        'StartNodeHash': parent_node_hash,
+        'RelationshipType': relationship_type,
+        'NodeLabel': str(cursor.kind).split('.')[1],
     }
 
-    current_node = merge_node(parent_node, relationship, str(cursor.kind).split('.')[1], **args)
+    current_node_hash = merge_node(**args)
 
     for enum_member in cursor.get_children():
         args = {
-            'type_name': enum_member.spelling,
-            'type_definition': str(enum_member.enum_value)
+            'TypeName': enum_member.spelling,
+            'TypeDefinition': str(enum_member.enum_value),
+            'StartNodeHash': current_node_hash,
+            'RelationshipType': 'EnumDefinition',
+            'NodeLabel': str(enum_member.kind).split('.')[1],
         }
-
-        merge_node(current_node, 'ENUM_Definition', str(enum_member.kind).split('.')[1], **args)
+        merge_node(**args)
 
 
 #########################################################################
@@ -468,17 +537,6 @@ cursor_handles = {
     CursorKind.CLASS_DECL: cursor_handle_do_nothing,
 }
 
-# Create a UNIQUE constraint for each node type
-node_label_list = []
-
-for label in type_handles:
-    node_label_list.append('CREATE CONSTRAINT ON (a: ' + label.name + ') ASSERT a.HASH IS UNIQUE')
-for label in cursor_handles:
-    node_label_list.append('CREATE CONSTRAINT ON (a: ' + label.name + ') ASSERT a.HASH IS UNIQUE')
-
-for label in node_label_list:
-    graph.run(label)
-
 
 #########################################################################
 #                         MAIN                                          #
@@ -515,12 +573,68 @@ def main():
 
     node = tu.cursor
 
-    parent_node = Node('Translation_Unit', type_name=node.spelling, type_definition='TU')  # root node of the tree
-    graph.create(parent_node)
+    args = {
+        'TypeName': node.spelling,
+        'TypeDefinition': 'TranslationUnit',
+        'StartNodeHash': 'TU' + node.spelling,
+        'RelationshipType': 'TranslationUnit',
+        'NodeLabel': 'TranslationUnit',
+    }
+
+    merge_node(**args)
 
     # iterate all declaration in the header, parse them and populate the graph
     for c in node.get_children():
-        cursor_handles[c.kind](c, parent_node, 'Top_Level_Declaration')
+        cursor_handles[c.kind](c, args['StartNodeHash'], 'Top_Level_Declaration')
+
+    # Init UNIQUE constraint for each node type
+    node_label_list = set()
+    for item in nodes_cache.values():
+        node_label_list.update({item[2], })
+
+    with driver.session() as session:
+        for node_label in node_label_list:
+            session.run('CREATE CONSTRAINT ON (a:' + node_label + ') ASSERT a.Hash IS UNIQUE')
+
+    # write information to csv
+    for node in nodes_cache:
+        nodes_csv_dict_writer.writerow({'TypeDefinition': nodes_cache[node][0], 'TypeName': nodes_cache[node][1],
+                                        'NodeLabel': nodes_cache[node][2], 'Hash': str(node)})
+    for relationship in relationships_cache:
+        start_node_hash, end_node_hash, relationship_type = relationship.split()
+        relationships_csv_dict_writer.writerow({'StartNodeHash': start_node_hash,
+                                                'EndNodeHash': end_node_hash,
+                                                'RelationshipType': relationship_type})
+
+    # Batch insert CSV into neo4j
+    with driver.session() as session:
+
+        filename = '\'file:/nodes.csv\' '
+        print('Now Processing: ', filename)
+        session.run("USING PERIODIC COMMIT 1000 "
+                    "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
+                                                               "CALL apoc.merge.node([row['NodeLabel']], {Hash: row['Hash']}, row) yield node "
+                                                               "RETURN true "
+                    )
+
+        filename = '\'file:/relationships.csv\' '
+        print('Now Processing: ', filename)
+
+        node_label_mapping = GraphNodeInformation.get_node_label_map(driver)
+
+        session.run("USING PERIODIC COMMIT 5000 "
+                    "LOAD CSV WITH HEADERS FROM " + filename + "AS rel_row "
+                    "CALL apoc.search.node({node_label_mapping}, 'exact', rel_row.StartNodeHash ) yield node as start "
+                    "CALL apoc.search.node({node_label_mapping}, 'exact', rel_row.EndNodeHash ) yield node as end "
+                    "CALL apoc.merge.relationship(start, rel_row.RelationshipType,"
+                    "{StartNodeHash: start.Hash, EndNodeHash: end.Hash, "
+                    "RelationshipType: rel_row.RelationshipType}, rel_row, end) yield rel "
+                    "RETURN True ", node_label_mapping=node_label_mapping)
+
+        session.sync()
+
+    nodes_csv.close()
+    relationships_csv.close()
 
     end_time = time.time()
     print("Operation done in ", end_time - start_time, " seconds")
