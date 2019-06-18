@@ -3,7 +3,6 @@ from neo4j import GraphDatabase
 from Common import GraphNodeInformation
 import xxhash
 import time
-import threading
 import csv
 import Configuration
 
@@ -15,6 +14,12 @@ import Configuration
 
 POINTER_SIZE = {'x32': 4, 'x64': 8}
 MAX_THREADS = 8
+
+# When encountering an incomplete array (arr[]) a size must be defined for BinaryNinja to accept it.
+INCOMPLETEARRAY_SIZE = 1
+
+# Anonymous definitions are given a pseudo random number to identify themselves
+ANONYMOUS_INDEX = 0
 
 #########################################################################
 #                                                                       #
@@ -60,6 +65,54 @@ relationships_cache = set()  # {str(StartNodeHash + EndNodeHash + RelationshipTy
 #                                                                       #
 #########################################################################
 
+def fix_array_definition(TypeDefinition, TypeName):
+    # An array (both complete and incomplete definition) apear in the TypeDefinition instead of the TypeName,
+    # for example: TypeDefinition: WORD [128] TypeName: PATCHARRAY.
+    # For proper c syntax, the [] part is moved to the TypeName, as so:
+    # TypeDefinition: WORD TypeName: PATCHARRAY[128] , so the final expression is "WORD PATCHARRAY[128]"
+
+    if TypeDefinition.endswith(']'):
+        array_def_index = TypeDefinition.rfind('[')
+        if array_def_index:
+            # store then array definition "[x]"
+            array_definition = TypeDefinition[array_def_index:]
+            # handle an incomplete array definition (for example "arr[]") by arbitrarily defining an array size
+            if array_definition[1] == ']':
+                array_definition = '[' + str(INCOMPLETEARRAY_SIZE) + ']'
+            # remove the array definition from the TypeDefinition
+            TypeDefinition = TypeDefinition[:array_def_index]
+            # add the array definition to the TypeName
+            TypeName += array_definition
+        else:
+            print("Failed to find an array definition within the type: ", TypeDefinition + TypeName)
+            return False, False
+    return TypeDefinition, TypeName
+
+
+#########################################################################
+
+def fix_anonymous_definition(string):
+    # Anonymous definitions are given an arbitrary pseudo random number to designate their name.
+    # The string argument is either a TypeDefinition or TypeName string.
+
+    if '(anonymous' in string:
+        start_index = string.rfind('(anonymous')
+        end_index = start_index
+        for chr in string[start_index:]:
+            end_index += 1
+            if chr == ')':
+                break
+        if end_index <= len(string):
+            hash = get_string_hash(string[start_index:end_index])
+            return string[:start_index] + hash + string[end_index:]
+        else:
+            print("Failed to parse anonymous definition: ", string)
+            return False
+    else:
+        return string
+
+#########################################################################
+
 
 def is_recursive_definition(start_node_hash, end_node_hash, relationship_type):
     """ Search for a circular definition of a type """
@@ -76,8 +129,17 @@ def get_node_hash(kwargs):
     xxhash_obj = xxhash.xxh64()
     xxhash_obj.update(str_to_digest)
 
-    return xxhash_obj.hexdigest()
+    return str(xxhash_obj.hexdigest())
 
+
+#########################################################################
+
+def get_string_hash(string):
+
+    xxhash_obj = xxhash.xxh64()
+    xxhash_obj.update(string)
+
+    return str(xxhash_obj.hexdigest())
 
 #########################################################################
 
@@ -598,7 +660,12 @@ def main():
 
     # write information to csv
     for node in nodes_cache:
-        nodes_csv_dict_writer.writerow({'TypeDefinition': nodes_cache[node][0], 'TypeName': nodes_cache[node][1],
+        TypeDefinition, TypeName = fix_array_definition(nodes_cache[node][0], nodes_cache[node][1])
+
+        TypeDefinition = fix_anonymous_definition(TypeDefinition)
+        TypeName = fix_anonymous_definition(TypeName)
+
+        nodes_csv_dict_writer.writerow({'TypeDefinition': TypeDefinition, 'TypeName': TypeName,
                                         'NodeLabel': nodes_cache[node][2], 'Hash': str(node)})
     for relationship in relationships_cache:
         start_node_hash, end_node_hash, relationship_type = relationship.split()
@@ -632,6 +699,7 @@ def main():
                     "RETURN True ", node_label_mapping=node_label_mapping)
 
         session.sync()
+        session.close()
 
     nodes_csv.close()
     relationships_csv.close()

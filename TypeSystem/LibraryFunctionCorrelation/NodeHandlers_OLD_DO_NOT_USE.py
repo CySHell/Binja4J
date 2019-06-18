@@ -19,7 +19,7 @@ driver = GraphDatabase.driver(Configuration.analysis_database_uri,
 
 class TypeDefinitionTree:
 
-    # This is the main cache used in the class, containing a mapping of a node ID to a string describing
+    # This is the export_bv cache used in the class, containing a mapping of a node ID to a string describing
     # its full recursive type definition in c language (meaning the string also contains definition for any
     # sub types used to define the type).
     # The key is the is the ID in the graph of the node, and the value is a list where the first element is a set

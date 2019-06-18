@@ -3,8 +3,8 @@ import Configuration
 
 
 class DiaFunc:
-    # This class is the main object that all heuristics will work with.
-    # This class has 2 main functions:
+    # This class is the export_bv object that all heuristics will work with.
+    # This class has 2 export_bv functions:
     #   1. obtain (from a neo4j DB) and represent all relevant information regarding a RootFunction, in order to allow
     #      efficient similarity testing.
     #   2. Populate a neo4j DB RootFunction object with a special node (node label: "DiaFuncInfo", relationship type: "Dia")

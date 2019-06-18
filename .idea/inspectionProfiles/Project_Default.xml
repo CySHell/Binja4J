@@ -16,6 +16,8 @@
           <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.types" />
           <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.binaryninja" />
           <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.Type" />
+          <option value="clang.cindex.CursorKind.PARM_DECL" />
+          <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.BinaryView" />
         </list>
       </option>
     </inspection_tool>

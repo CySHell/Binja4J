@@ -1,10 +1,9 @@
 # A module to define the traversal of a type definition on the graph, and to feed the definition to binary ninja
 
-from neo4j import GraphDatabase, exceptions
-import Configuration
-from Common import GraphNodeInformation
-from . import CorrelateLibraryFunctionInfo
+from neo4j import GraphDatabase
+from ...Common import GraphNodeInformation
 from binaryninja import *
+from ... import Configuration
 
 ########################################################################################################################
 
@@ -21,44 +20,170 @@ driver = GraphDatabase.driver(Configuration.analysis_database_uri,
 class TypeDefinitionTree:
     type_definition_cache = dict()
 
-    def __init__(self, type_name: str, driver):
+    def __init__(self, type_name: str, driver, bv):
         self.type_name = type_name
         self.driver = driver
         self.node_label_map = GraphNodeInformation.get_node_label_map(self.driver)
-
-        with self.driver.session() as session:
-            result = session.run("MATCH (type {TypeName: '" + str(type_name) + "'}) "
-                                                                               "WHERE labels(type)[0] ENDS_WITH '_DECL' "
-                                                                               "RETURN type.Hash as type_hash, labels(type)[0] as label"
-                                 )
-
-        self.type_node_label = result.peek()['label'] + '_handler'
-        self.type_node_hash = result.peek()['type_hash']
+        self.bv = bv
 
     def insert_type_definition_into_binaryView(self, current_node_label=None, current_node_hash=None):
         """
         :return: True if managed to insert full definition, False otherwise
         """
 
-        if not current_node_hash:
-            current_node_hash = self.type_node_hash
-        if not current_node_label:
-            current_node_label = self.type_node_label
+        if not current_node_hash and not current_node_label:
+            with self.driver.session() as session:
+                result = session.run("MATCH (type {TypeName: '" + str(self.type_name) + "'}) "
+                                     "RETURN type.Hash as type_hash, labels(type)[0] as label"
+                                     )
+            if result.peek():
+                current_node_label = result.peek()['label']
+                current_node_hash = result.peek()['type_hash']
+            else:
+                print("Type ", self.type_name, " not found in the DB, aborting.")
+                return False
 
         # Skip definition if its already in the binary view
         if current_node_hash in self.type_definition_cache:
             return True
 
         # Run the function handler corresponding to the node label we are currently examining
-        if getattr(self, current_node_label + '_handler', lambda: False)(current_node_hash):
+        handler_function = getattr(self, current_node_label + '_handler', lambda x: False)
+
+        if handler_function(current_node_hash):
+            print("Defined Function: ", self.type_name)
             return True
         else:
             return False
 
+    def FUNCTION_DECL_handler(self, current_node_hash):
+
+        with self.driver.session() as session:
+            result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash}})-[:FunctionArgument]->"
+                                 "(func_param:PARM_DECL) "
+                                 "RETURN func_param.Hash as param_hash, "
+                                 "       func_param.TypeDefinition as type_definition,"
+                                 "       func_param.TypeName as type_name ",
+                                 current_node_hash=current_node_hash)
+
+            # Parse function arguments
+            if result.peek():
+                function_parameter_list = list()
+                for record in result:
+                    # If parameter type is already defined move on to the next parameter
+                    if self.type_definition_cache.get(record['param_hash']):
+                        continue
+                    if self.insert_type_definition_into_binaryView('PARM_DECL', record['param_hash']):
+                        self.type_definition_cache[record['param_hash']] = True
+                    else:
+                        print("Failed to insert definition for function parameter ", record['type_name'])
+                        return False
+
+
+                    try:
+                        # Define the Function parameter binaryNinja object
+                        function_parameter_list.append(types.FunctionParameter(self.bv.get_type_by_name(record['type_name']),
+                                                                               record['type_name']))
+                    except:
+                        return False
+            else:
+                # A function might not have any return value or arguments
+                pass
+
+            # Parse return value and function name
+            result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash}})-[:ReturnType]->"
+                                 "(return_type) "
+                                 "RETURN return_type.Hash as return_hash, "
+                                 "       labels(return_type)[0] as return_label, "
+                                 "       return_type.TypeDefinition as type_definition, "
+                                 "       return_type.TypeName as type_name ",
+                                 current_node_hash=current_node_hash)
+
+            return_type = types.Type.void()
+
+            if result.peek():
+                for record in result:
+                    # If return type is already defined move on, otherwise define it
+                    if not self.type_definition_cache.get(record['return_hash']):
+                        if self.insert_type_definition_into_binaryView(record['return_label'], record['return_hash']):
+                            self.type_definition_cache[record['return_hash']] = True
+                        else:
+                            print("Failed to insert definition for function return value ", record['type_name'])
+                            return False
+
+                        try:
+                            # Define the Function return value binaryNinja type object
+                            var_type, name = self.bv.parse_type_string(
+                                record['type_definition'] + " " + record['type_name'])
+                            self.bv.define_user_type(name, var_type)
+                            return_type = self.bv.get_type_by_name(name)
+                            print(self.bv.get_type_by_name(name))
+                        except:
+                            return False
+            else:
+                # A function might not have any return value or arguments
+                pass
+
+            # Define the function itself
+            result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash}}) "
+                                 "RETURN func.TypeName as func_name",
+                                 current_node_hash=current_node_hash)
+
+            if result.peek():
+                try:
+                    func_name = result.peek()['func_name']
+                    for func in self.bv.functions:
+                        if func.name == func_name:
+                            func_cc = func.calling_convention
+                            function_type = Type.function(return_type, function_parameter_list, func_cc)
+                            func.set_user_type(function_type)
+                    self.type_definition_cache[current_node_hash] = True
+                except:
+                    print("Failed to process function :", func_name)
+                    print(return_type)
+                    return False
+
+    def PARM_DECL_handler(self, current_node_hash):
+
+        with self.driver.session() as session:
+            result = session.run("MATCH (parm:PARM_DECL {Hash: {current_node_hash}})-[]->"
+                                 "(sub_type) "
+                                 "RETURN sub_type.Hash as sub_type_hash, "
+                                 "       labels(sub_type)[0] as sub_type_label",
+                                 current_node_hash=current_node_hash)
+
+            if result.peek():
+                for record in result:
+                    if self.insert_type_definition_into_binaryView(record['sub_type_label'], record['sub_type_hash']):
+                        self.type_definition_cache[record['sub_type_hash']] = True
+                    else:
+                        print("Failed to insert definition for parameter sub type", record['sub_type_hash'])
+                        return False
+            else:
+                print("Function Parameter has no target, current parameter hash: ", current_node_hash)
+                return False
+
+            result = session.run("MATCH (parm:PARM_DECL {Hash: {current_node_hash}}) "
+                                 "RETURN parm.TypeName as type_name, "
+                                 "       parm.TypeDefinition as type_definition",
+                                 current_node_hash=current_node_hash)
+
+            if result.peek():
+                try:
+                    print()
+                    var_type, name = self.bv.parse_type_string(result.peek()['type_definition'] +
+                                                               " " + result.peek()['type_name'])
+                    self.bv.define_user_type(name, var_type)
+                    self.type_definition_cache[current_node_hash] = True
+                    return True
+                except:
+                    print("Failed to define a user type for function parameter with hash ", current_node_hash)
+                    return False
+
     def BaseType_handler(self, current_node_hash):
 
         with self.driver.session() as session:
-            result = session.run("MATCH (type:BaseType {Hash: {current_node_hash}) "
+            result = session.run("MATCH (type:BaseType {Hash: {current_node_hash}}) "
                                  "RETURN type.TypeName as type_name, type.TypeDefinition as type_definition ",
                                  current_node_hash=current_node_hash)
 
@@ -71,8 +196,8 @@ class TypeDefinitionTree:
 
             # Define the user type obtained from the graph
             try:
-                var_type, name = bv.parse_type_string(type_definition + " " + type_name)
-                bv.define_user_type(name, var_type)
+                var_type, name = self.bv.parse_type_string(type_definition + " " + type_name)
+                self.bv.define_user_type(name, var_type)
                 # If the type was added successfully, mark it in the cache
                 self.type_definition_cache[current_node_hash] = True
                 return True
@@ -82,7 +207,7 @@ class TypeDefinitionTree:
     def POINTER_handler(self, current_node_hash):
 
         with self.driver.session() as session:
-            result = session.run("MATCH (:POINTER {Hash: {current_node_hash})-[:PointerTo]->(pointee) "
+            result = session.run("MATCH (:POINTER {Hash: {current_node_hash}})-[]->(pointee) "
                                  "RETURN pointee.Hash as pointee_hash, labels(pointee)[0] as pointee_label ",
                                  current_node_hash=current_node_hash)
 
@@ -103,7 +228,7 @@ class TypeDefinitionTree:
     def ENUM_DECL_handler(self, current_node_hash):
 
         with self.driver.session() as session:
-            result = session.run("MATCH (enum:ENUM_DECL {Hash: {current_node_hash})-[:EnumDefinition]->"
+            result = session.run("MATCH (enum:ENUM_DECL {Hash: {current_node_hash}})-[:EnumDefinition]->"
                                  "(enum_field:ENUM_CONSTANT_DECL) "
                                  "RETURN enum_field.TypeDefinition as enum_index, enum_field.TypeName as field_name",
                                  current_node_hash=current_node_hash)
@@ -123,12 +248,12 @@ class TypeDefinitionTree:
                 print("Pointer has no target, current pointer hash: ", current_node_hash)
                 return False
 
-            result = session.run("MATCH (enum:ENUM_DECL {Hash: {current_node_hash}) "
+            result = session.run("MATCH (enum:ENUM_DECL {Hash: {current_node_hash}}) "
                                  "RETURN enum.TypeName as enum_name",
                                  current_node_hash=current_node_hash)
 
             try:
-                bv.define_user_type(result.peek()['enum_name'], Type.enumeration_type(bv.arch, enum))
+                self.bv.define_user_type(result.peek()['enum_name'], Type.enumeration_type(self.bv.arch, enum))
                 self.type_definition_cache[current_node_hash] = True
                 return True
             except:
@@ -137,7 +262,7 @@ class TypeDefinitionTree:
     def STRUCT_DECL_handler(self, current_node_hash):
 
         with self.driver.session() as session:
-            result = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash})-[:FieldDef]->"
+            result = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash}})-[:FieldDef]->"
                                  "(struct_field:StructFieldDecl) "
                                  "RETURN struct_field.Hash as field_hash, "
                                  "       struct_field.TypeDefinition as type_definition,"
@@ -160,7 +285,8 @@ class TypeDefinitionTree:
 
                     try:
                         # add struct member
-                        var_type, name = bv.parse_type_string(record['type_definition'] + " " + record['type_name'])
+                        var_type, name = self.bv.parse_type_string(
+                            record['type_definition'] + " " + record['type_name'])
                         struct.append(var_type, str(name))
                     except:
                         return False
@@ -168,12 +294,12 @@ class TypeDefinitionTree:
                 print("Struct has no target, current struct hash: ", current_node_hash)
                 return False
 
-            result = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash}) "
+            result = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash}}) "
                                  "RETURN struct.TypeName as struct_name",
                                  current_node_hash=current_node_hash)
 
             try:
-                bv.define_user_type(result.peek()['struct_name'], Type.structure_type(struct))
+                self.bv.define_user_type(result.peek()['struct_name'], Type.structure_type(struct))
                 return True
             except:
                 return False
@@ -181,7 +307,7 @@ class TypeDefinitionTree:
     def UNION_DECL_handler(self, current_node_hash):
 
         with self.driver.session() as session:
-            result = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash})-[:FieldDef]->"
+            result = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash}})-[:FieldDef]->"
                                  "(union_field) "
                                  "RETURN union_field.Hash as field_hash, "
                                  "       labels(union_field)[0] as field_label, "
@@ -207,7 +333,8 @@ class TypeDefinitionTree:
 
                     try:
                         # add struct member
-                        var_type, name = bv.parse_type_string(record['type_definition'] + " " + record['type_name'])
+                        var_type, name = self.bv.parse_type_string(
+                            record['type_definition'] + " " + record['type_name'])
                         struct.append(var_type, str(name))
                     except:
                         return False
@@ -215,295 +342,147 @@ class TypeDefinitionTree:
                 print("Union has no target, current Union hash: ", current_node_hash)
                 return False
 
-            result = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash}) "
+            result = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash}}) "
                                  "RETURN union.TypeName as union_name",
                                  current_node_hash=current_node_hash)
 
             try:
-                bv.define_user_type(result.peek()['union_name'], Type.structure_type(struct))
+                self.bv.define_user_type(result.peek()['union_name'], Type.structure_type(struct))
                 return True
             except:
                 return False
 
-    def FUNCTION_DECL_handler(self, current_node_hash):
+    def TYPEDEF_DECL_handler(self, current_node_hash):
 
         with self.driver.session() as session:
-            result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash})-[:FunctionArgument]->"
-                                 "(func_param:PARM_DECL) "
-                                 "RETURN func_param.Hash as param_hash, "
-                                 "       func_param.TypeDefinition as type_definition,"
-                                 "       func_param.TypeName as type_name ",
+            result = session.run("MATCH (typedef:TYPEDEF_DECL {Hash: {current_node_hash}})-[]->"
+                                 "(sub_type) "
+                                 "RETURN sub_type.Hash as sub_type_hash, "
+                                 "       labels(sub_type)[0] as sub_type_label",
                                  current_node_hash=current_node_hash)
 
-            # Parse function arguments
             if result.peek():
-                function_parameter_list = list()
                 for record in result:
-                    # If parameter type is already defined move on to the next parameter
-                    if self.type_definition_cache[record['param_hash']]:
-                        continue
-                    if self.insert_type_definition_into_binaryView('PARM_DECL', record['param_hash']):
-                        self.type_definition_cache[record['param_hash']] = True
+                    if self.insert_type_definition_into_binaryView(record['sub_type_label'], record['sub_type_hash']):
+                        self.type_definition_cache[record['sub_type_hash']] = True
                     else:
-                        print("Failed to insert definition for function parameter ", record['type_name'])
-                        return False
-
-                    try:
-                        # Define the Function parameter binaryNinja object
-                        function_parameter_list.append(types.FunctionParameter(record['type_definition'],
-                                                                               record['type_name']))
-                    except:
+                        print("Failed to insert definition for typedef sub type ", record['sub_type_hash'])
                         return False
             else:
-                # A function might not have any return value or arguments
-                pass
+                print("Typedef has no target, current struct hash: ", current_node_hash)
+                return False
 
-            # Parse return value and function name
-            result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash})-[:ReturnType]->"
-                                 "(return_type) "
-                                 "RETURN return_type.Hash as return_hash, "
-                                 "       labels(return_type)[0] as return_label, "
-                                 "       return_type.TypeDefinition as type_definition, "
-                                 "       return_type.TypeName as type_name, ",
-                                 current_node_hash=current_node_hash)
-
-            return_type = None
-            if result.peek():
-                for record in result:
-                    # If return type is already defined move on, otherwise define it
-                    if not self.type_definition_cache[record['param_hash']]:
-                        if self.insert_type_definition_into_binaryView(record['return_label'], record['return_hash']):
-                            self.type_definition_cache[record['return_hash']] = True
-                        else:
-                            print("Failed to insert definition for function return value ", record['type_name'])
-                            return False
-
-                        try:
-                            # Define the Function return value binaryNinja type object
-                            var_type, name = bv.parse_type_string(record['type_definition'] + " " + record['type_name'])
-                            bv.define_user_type(name, var_type)
-                            return_type = var_type
-                        except:
-                            return False
-            else:
-                # A function might not have any return value or arguments
-                pass
-
-            # Define the function itself
-            result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash}) "
-                                 "RETURN func.TypeName as func_name",
+            result = session.run("MATCH (typedef:TYPEDEF_DECL {Hash: {current_node_hash}}) "
+                                 "RETURN typedef.TypeName as type_name, "
+                                 "       typedef.TypeDefinition as type_definition",
                                  current_node_hash=current_node_hash)
 
             if result.peek():
                 try:
-                    func_name = result.peek()['func_name']
-                    function_type = Type.function(return_type, function_parameter_list)
-
-                    # TODO: set current_function correctly, and change its name accordingly
-                    current_function.set_user_type(function_type)
-
+                    var_type, name = self.bv.parse_type_string(result.peek()['type_definition'] +
+                                                               " " + result.peek()['type_name'])
+                    self.bv.define_user_type(name, var_type)
                     self.type_definition_cache[current_node_hash] = True
+                    return True
                 except:
-                    print("Failed to process function :", func_name)
+                    print("Failed to define a user type for typedef with hash ", current_node_hash)
                     return False
-`
 
+    def CONSTANTARRAY_handler(self, current_node_hash):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def CONSTANTARRAY_handler(self, current_node_label, current_node_hash):
-
-        if current_node_hash in self.type_definition_cache:
-            return True
-
-        with driver.session() as session:
-            result = session.run("MATCH (decl {HASH: '" + str(node_hash) + "'})-[]->(sub_type_node) "
-                                                                           "RETURN sub_type_node.HASH as child_node_hash, "
-                                                                           "       LABELS(sub_type_node)[0] as child_node_label "
-                                 )
-
-            result = session.run("MATCH (type:" + current_node_label + " {Hash: {current_node_hash})-[]->(sub_type) "
-                                                                       "RETURN type.TypeName as type_name, type.TypeDefinition as type_definition ",
+        with self.driver.session() as session:
+            result = session.run("MATCH (array:CONSTANTARRAY {Hash: {current_node_hash}})-[]->"
+                                 "(array_type) "
+                                 "RETURN array_type.Hash as sub_type_hash, "
+                                 "       labels(array_type)[0] as sub_type_label",
                                  current_node_hash=current_node_hash)
 
-            children_node_hash_list = []
-
-            for record in result:
-                if node_handler[record['child_node_label']](record['child_node_hash']):
-                    children_node_hash_list.append(record['child_node_hash'])
-                else:
-                    print("Unable to parse type: ", record['child_node_hash'])
-                    return False
-
-            # If I reached this part of the declaration then I am assured that all child types of this declaration
-            # have been successfully added to the type cache.
-            result = session.run("MATCH (decl {HASH: '" + str(node_hash) + "'}) "
-                                                                           "RETURN decl.type_name as type_name, decl.type_definition as type_definition")
-
-            for record in result:
-                type_definition_cache[node_hash] = [(record['type_definition'], record['type_name']),
-                                                    children_node_hash_list]
-
-            # TODO: handle a problem with adding the leaf node to the cache and return False
-            return type_definition_cache
-
-    def function_decl_handler(node_hash):
-        # The graph traversal is all recursively handled from this function, with the function itself being
-        # the root of the parsed type tree.
-        # Node label 'FUNCTION_DECL'
-
-        if node_hash in type_definition_cache:
-            return type_definition_cache
-
-        with driver.session() as session:
-            result = session.run("MATCH (func_decl:FUNCTION_DECL {HASH: '" + str(node_hash) + "'}) "
-                                                                                              "MATCH (func_decl)-[:Return_Type]->(return_type) "
-                                                                                              "MATCH (func_decl)-[:Function_Argument]->(function_arg:PARM_DECL) "
-                                                                                              "RETURN func_decl.type_definition as func_type_definition, "
-                                                                                              "       return_type.HASH as return_type_node_hash, "
-                                                                                              "       labels(return_type)[0] as return_type_label, "
-                                                                                              "       function_arg.HASH as arg_node_hash, "
-                                                                                              "       labels(function_arg)[0] as arg_label")
-
-            function_arguments_list = list()
-
-            for record in result:
-                if not function_arguments_list:
-                    if node_handler[record['return_type_label']](record['return_type_node_hash']):
-                        function_arguments_list.append(record['return_type_node_hash'])
+            if result.peek():
+                for record in result:
+                    if self.insert_type_definition_into_binaryView(record['sub_type_label'], record['sub_type_hash']):
+                        self.type_definition_cache[record['sub_type_hash']] = True
                     else:
-                        print("Unable to parse function return type: ", record['return_type_node_hash'])
-                        break
-                if node_handler[record['arg_label']](record['arg_node_hash']):
-                    function_arguments_list.append(record['arg_node_hash'])
-                else:
-                    print("Unable to parse function argument: ", record['arg_node_hash'])
-                    break
+                        print("Failed to insert definition for array type ", record['sub_type_hash'])
+                        return False
+            else:
+                print("Array has no target type, current Array hash: ", current_node_hash)
+                return False
 
-            # If I reached this part of the declaration then I am assured that all child types of this declaration
-            # have been successfully added to the type cache.
-            result = session.run("MATCH (decl:FUNCTION_DECL {HASH: '" + str(node_hash) + "'}) "
-                                                                                         "RETURN decl.type_name as type_name, decl.type_definition as type_definition")
+            self.type_definition_cache[current_node_hash] = True
+            return True
 
-            for record in result:
-                type_definition_cache[node_hash] = [(record['type_definition'], record['type_name']),
-                                                    function_arguments_list]
+    def INCOMPLETEARRAY_handler(self, current_node_hash):
 
-            # TODO: handle a problem with adding the leaf node to the cache and return False
-            return type_definition_cache
+        with self.driver.session() as session:
+            result = session.run("MATCH (array:INCOMPLETEARRAY {Hash: {current_node_hash}})-[]->"
+                                 "(array_type) "
+                                 "RETURN array_type.Hash as sub_type_hash, "
+                                 "       labels(array_type)[0] as sub_type_label",
+                                 current_node_hash=current_node_hash)
 
-    def pointer_node_handler(node_hash):
-        # Node Label: 'POINTER'
+            if result.peek():
+                for record in result:
+                    if self.insert_type_definition_into_binaryView(record['sub_type_label'], record['sub_type_hash']):
+                        self.type_definition_cache[record['sub_type_hash']] = True
+                    else:
+                        print("Failed to insert definition for array type ", record['sub_type_hash'])
+                        return False
+            else:
+                print("Array has no target type, current Array hash: ", current_node_hash)
+                return False
 
-        if node_hash in type_definition_cache:
-            return type_definition_cache
+            self.type_definition_cache[current_node_hash] = True
+            return True
 
-        with driver.session() as session:
-            result = session.run("MATCH (p:POINTER {HASH: '" + str(node_hash) + "'})-[:PointerTo]->(pointee) "
-                                                                                "RETURN pointee.HASH as pointee_hash, LABELS(pointee)[0] as pointee_label ")
+    def StructFieldDecl_handler(self, current_node_hash):
 
-            for record in result:
-                if node_handler[record['pointee_label']](record['pointee_hash']):
-                    type_definition_cache[node_hash] = [('void *', 'null'), [record['pointee_hash']]]
-                else:
-                    print("Unable to parse pointee: ", record['pointee_hash'])
-                    return False
-            return type_definition_cache
+        with self.driver.session() as session:
+            result = session.run("MATCH (field:StructFieldDecl {Hash: {current_node_hash}})-[]->"
+                                 "(field_def) "
+                                 "RETURN field_def.Hash as field_hash, "
+                                 "       labels(field_def)[0] as field_label, "
+                                 "       field_def.TypeDefinition as type_definition,"
+                                 "       field_def.TypeName as type_name ",
+                                 current_node_hash=current_node_hash)
 
-    def decl_node_handler(node_hash):
-        # Node Label: 'PARM_DECL' or 'TYPEDEF_DECL' or 'STRUCT_DECL' or 'ENUM_DECL' or
-        #             'CONSTANTARRAY' or
+            if result.peek():
+                for record in result:
+                    if self.insert_type_definition_into_binaryView(record['field_label'], record['field_hash']):
+                        self.type_definition_cache[record['field_hash']] = True
+                    else:
+                        print("Failed to insert definition for struct field ", record['field_hash'])
+                        return False
+            else:
+                print("Failed to find struct field definition, struct hash:  ", current_node_hash)
+                return False
 
-        if node_hash in type_definition_cache:
-            return type_definition_cache
+            result = session.run("MATCH (field:StructFieldDecl {Hash: {current_node_hash}}) "
+                                 "RETURN field.TypeName as field_name, "
+                                 "       field.TypeDefinition as field_definition",
+                                 current_node_hash=current_node_hash)
 
-        with driver.session() as session:
-            result = session.run("MATCH (decl {HASH: '" + str(node_hash) + "'})-[]->(sub_type_node) "
-                                                                           "RETURN sub_type_node.HASH as child_node_hash, "
-                                                                           "       LABELS(sub_type_node)[0] as child_node_label "
-                                 )
+            try:
+                var_type, name = self.bv.parse_type_string(result['field_definition'] + " " + record['field_name'])
+                self.bv.define_user_type(name, var_type)
+                self.type_definition_cache[current_node_hash] = True
+                return True
+            except:
+                return False
 
-            children_node_hash_list = []
+    def VAR_DECL_handler(self, current_node_hash):
 
-            for record in result:
-                if node_handler[record['child_node_label']](record['child_node_hash']):
-                    children_node_hash_list.append(record['child_node_hash'])
-                else:
-                    print("Unable to parse type: ", record['child_node_hash'])
-                    return False
+        print("Not handling definition of VAR_DECL with hash: ", current_node_hash)
+        return True
 
-            # If I reached this part of the declaration then I am assured that all child types of this declaration
-            # have been successfully added to the type cache.
-            result = session.run("MATCH (decl {HASH: '" + str(node_hash) + "'}) "
-                                                                           "RETURN decl.type_name as type_name, decl.type_definition as type_definition")
+    def FUNCTIONPROTO_handler(self, current_node_hash):
 
-            for record in result:
-                type_definition_cache[node_hash] = [(record['type_definition'], record['type_name']),
-                                                    children_node_hash_list]
+        print("Not handling definition of FUNCTIONPROTO with hash: ", current_node_hash)
+        return True
 
-            # TODO: handle a problem with adding the leaf node to the cache and return False
-            return type_definition_cache
+    def FUNCTIONNOPROTO_handler(self, current_node_hash):
 
-    def do_nothing(node_hash):
-        # This function is intended for cases where no actions are needed, or for when the support
-        # for the label is not implemented yet.
-        pass
-
-    # SWITCH statement to help navigate the different nodes in the graph.
-    # Each node handler function receives a node hash of the corresponding node type, and returns a type_definition_cache
-    # dictionary or False if no definition could be constructed.
-
-    node_handler = {
-        'BaseType': leaf_type_node_handler,
-        'PARM_DECL': decl_node_handler,
-        'TYPEDEF_DECL': decl_node_handler,
-        'STRUCT_DECL': decl_node_handler,
-        'Struct_Field_DECL': decl_node_handler,
-        'ENUM_DECL': decl_node_handler,
-        'ENUM_CONSTANT_DECL': leaf_type_node_handler,
-        'POINTER': pointer_node_handler,
-        'CONSTANTARRAY': decl_node_handler,
-        'FUNCTIONNOPROTO': do_nothing,
-        'FUNCTION_DECL': function_decl_handler,
-    }
+        print("Not handling definition of FUNCTIONNOPROTO with hash: ", current_node_hash)
+        return True
 
 
 if __name__ == '__main__':

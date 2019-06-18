@@ -11,7 +11,7 @@ from ..Common import ContextManagement
 
 
 class BinjaGraph:
-    #   The BinjaGraph object holds the main functionality of the whole plugin:
+    #   The BinjaGraph object holds the export_bv functionality of the whole plugin:
     #   1. Traverse the BinaryView and map all the objects to several CSV files
     #   2. Determine the relationships between all objects in the BinaryView
     #   3. Collect any additional information requested by the analysis_database_user from each object (via the /extraction_helpers)
