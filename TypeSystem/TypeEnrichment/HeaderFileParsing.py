@@ -111,6 +111,7 @@ def fix_anonymous_definition(string):
     else:
         return string
 
+
 #########################################################################
 
 
@@ -125,7 +126,7 @@ def is_recursive_definition(start_node_hash, end_node_hash, relationship_type):
 #########################################################################
 
 def get_node_hash(kwargs):
-    str_to_digest = str(kwargs['TypeName']) + str(kwargs['TypeDefinition'])
+    str_to_digest = str(kwargs['TypeName']) + str(kwargs['TypeDefinition']) + str(kwargs['NodeLabel'])
     xxhash_obj = xxhash.xxh64()
     xxhash_obj.update(str_to_digest)
 
@@ -135,11 +136,11 @@ def get_node_hash(kwargs):
 #########################################################################
 
 def get_string_hash(string):
-
     xxhash_obj = xxhash.xxh64()
     xxhash_obj.update(string)
 
     return str(xxhash_obj.hexdigest())
+
 
 #########################################################################
 
@@ -155,6 +156,16 @@ def merge_node(**kwargs):
         kwargs['TypeName'] = 'None'
 
     kwargs['Hash'] = get_node_hash(kwargs)
+
+    if '(*)' in kwargs['TypeDefinition']:
+        # The type contains a pointer to a function prototype
+        # args['TypeDefinition'] = HRESULT (*)(IRpcChannelBuffer *, RPCOLEMESSAGE *, ULONG *)
+        # args['TypeName']       = SendReceive
+        index = kwargs['TypeDefinition'].find('(*)')
+        TypeDefinition = kwargs['TypeDefinition'][:index + 2] + kwargs['TypeName'] \
+                         + ')' + kwargs['TypeDefinition'][index + 3:]
+        kwargs['TypeName'] = ';'
+        kwargs['TypeDefinition'] = TypeDefinition
 
     if not nodes_cache.get(kwargs['Hash']):
         nodes_cache.update({kwargs['Hash']: (kwargs['TypeDefinition'], kwargs['TypeName'], kwargs['NodeLabel'])})
@@ -403,7 +414,7 @@ def cursor_handle_struct_decl(cursor, parent_node_hash, relationship_type):
     args = {
         'TypeName': (cursor.type.spelling.split()[1].split('::')[0] + '_AnonymousStruct') if cursor.is_anonymous()
         else cursor.spelling,
-        'TypeDefinition': 'Struct',
+        'TypeDefinition': 'struct',
         'StartNodeHash': parent_node_hash,
         'RelationshipType': relationship_type,
         'NodeLabel': str(cursor.kind).split('.')[1],
@@ -411,7 +422,14 @@ def cursor_handle_struct_decl(cursor, parent_node_hash, relationship_type):
 
     if not is_recursive_definition(args['StartNodeHash'], get_node_hash(args), args['RelationshipType']):
         current_node_hash = merge_node(**args)
-        for field in cursor.type.get_fields():
+        field_list = list(cursor.type.get_fields())
+        if not field_list:
+            # For some struct_decl, clang doesn't contain fields, but it does recognize the children of the node,
+            # probably due to a bug.
+            # if get_fields() doesn't work, just get the children of the node and treat them as the fields.
+            # example struct that behaves like this: struct _EXCEPTION_POINTERS
+            field_list = list(cursor.get_children())
+        for field in field_list:
             args = {
                 'TypeName': field.spelling,
                 'TypeDefinition': field.type.spelling,
@@ -430,7 +448,7 @@ def cursor_handle_function_decl(cursor, parent_node_hash, relationship_type):
 
     args = {
         'TypeName': cursor.spelling,
-        'TypeDefinition': cursor.type.spelling,
+        'TypeDefinition': cursor.displayname,
         'StartNodeHash': parent_node_hash,
         'RelationshipType': relationship_type,
         'NodeLabel': str(cursor.kind).split('.')[1],
@@ -691,12 +709,12 @@ def main():
 
         session.run("USING PERIODIC COMMIT 5000 "
                     "LOAD CSV WITH HEADERS FROM " + filename + "AS rel_row "
-                    "CALL apoc.search.node({node_label_mapping}, 'exact', rel_row.StartNodeHash ) yield node as start "
-                    "CALL apoc.search.node({node_label_mapping}, 'exact', rel_row.EndNodeHash ) yield node as end "
-                    "CALL apoc.merge.relationship(start, rel_row.RelationshipType,"
-                    "{StartNodeHash: start.Hash, EndNodeHash: end.Hash, "
-                    "RelationshipType: rel_row.RelationshipType}, rel_row, end) yield rel "
-                    "RETURN True ", node_label_mapping=node_label_mapping)
+                                                               "CALL apoc.search.node({node_label_mapping}, 'exact', rel_row.StartNodeHash ) yield node as start "
+                                                               "CALL apoc.search.node({node_label_mapping}, 'exact', rel_row.EndNodeHash ) yield node as end "
+                                                               "CALL apoc.merge.relationship(start, rel_row.RelationshipType,"
+                                                               "{StartNodeHash: start.Hash, EndNodeHash: end.Hash, "
+                                                               "RelationshipType: rel_row.RelationshipType}, rel_row, end) yield rel "
+                                                               "RETURN True ", node_label_mapping=node_label_mapping)
 
         session.sync()
         session.close()

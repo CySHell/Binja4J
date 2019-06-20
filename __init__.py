@@ -36,6 +36,9 @@ def annotate_functions(bv):
             type_def_tree = NodeHandlers.TypeDefinitionTree(func.name, driver, bv)
             type_def_tree.insert_type_definition_into_binaryView()
 
+    #type_def_tree = NodeHandlers.TypeDefinitionTree('malloc', driver, bv)
+    #type_def_tree.insert_type_definition_into_binaryView()
+
     end_time = time.time()
     print("Operation done in ", end_time - start_time, " seconds")
 

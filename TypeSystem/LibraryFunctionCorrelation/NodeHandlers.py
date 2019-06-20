@@ -34,13 +34,13 @@ class TypeDefinitionTree:
         if not current_node_hash and not current_node_label:
             with self.driver.session() as session:
                 result = session.run("MATCH (type {TypeName: '" + str(self.type_name) + "'}) "
-                                     "RETURN type.Hash as type_hash, labels(type)[0] as label"
+                                                                                        "RETURN type.Hash as type_hash, labels(type)[0] as label"
                                      )
             if result.peek():
                 current_node_label = result.peek()['label']
                 current_node_hash = result.peek()['type_hash']
             else:
-                print("Type ", self.type_name, " not found in the DB, aborting.")
+                # print("Type ", self.type_name, " not found in the DB, aborting.")
                 return False
 
         # Skip definition if its already in the binary view
@@ -51,7 +51,7 @@ class TypeDefinitionTree:
         handler_function = getattr(self, current_node_label + '_handler', lambda x: False)
 
         if handler_function(current_node_hash):
-            print("Defined Function: ", self.type_name)
+            # print("Defined Function: ", self.type_name)
             return True
         else:
             return False
@@ -67,8 +67,8 @@ class TypeDefinitionTree:
                                  current_node_hash=current_node_hash)
 
             # Parse function arguments
+            function_parameter_list = list()
             if result.peek():
-                function_parameter_list = list()
                 for record in result:
                     # If parameter type is already defined move on to the next parameter
                     if self.type_definition_cache.get(record['param_hash']):
@@ -79,16 +79,14 @@ class TypeDefinitionTree:
                         print("Failed to insert definition for function parameter ", record['type_name'])
                         return False
 
-
                     try:
                         # Define the Function parameter binaryNinja object
-                        function_parameter_list.append(types.FunctionParameter(self.bv.get_type_by_name(record['type_name']),
-                                                                               record['type_name']))
-                    except:
+                        function_parameter_list.append(
+                            types.FunctionParameter(self.bv.get_type_by_name(record['type_name']),
+                                                    record['type_name']))
+                    except Exception as e:
+                        print("FUNCTION_DECL_handler: Failed to process function parameter" + str(e))
                         return False
-            else:
-                # A function might not have any return value or arguments
-                pass
 
             # Parse return value and function name
             result = session.run("MATCH (func:FUNCTION_DECL {Hash: {current_node_hash}})-[:ReturnType]->"
@@ -113,12 +111,17 @@ class TypeDefinitionTree:
 
                         try:
                             # Define the Function return value binaryNinja type object
-                            var_type, name = self.bv.parse_type_string(
-                                record['type_definition'] + " " + record['type_name'])
-                            self.bv.define_user_type(name, var_type)
-                            return_type = self.bv.get_type_by_name(name)
-                            print(self.bv.get_type_by_name(name))
-                        except:
+                            if record['type_definition'] == 'PointerTo':
+                                # Return type is a pointer
+                                var_type, name = self.bv.parse_type_string(record['type_name'][:-1])
+                                return_type = Type.pointer(self.bv.arch, var_type)
+                            else:
+                                var_type, name = self.bv.parse_type_string(
+                                    record['type_definition'] + " " + record['type_name'])
+                                self.bv.define_user_type(name, var_type)
+                                return_type = Type.named_type_from_type(name, self.bv.get_type_by_name(name))
+                        except Exception as e:
+                            print("FUNCTION_DECL_handler: Failed to process return value, " + str(e))
                             return False
             else:
                 # A function might not have any return value or arguments
@@ -130,17 +133,17 @@ class TypeDefinitionTree:
                                  current_node_hash=current_node_hash)
 
             if result.peek():
+                func_name = result.peek()['func_name']
                 try:
-                    func_name = result.peek()['func_name']
                     for func in self.bv.functions:
                         if func.name == func_name:
                             func_cc = func.calling_convention
                             function_type = Type.function(return_type, function_parameter_list, func_cc)
                             func.set_user_type(function_type)
                     self.type_definition_cache[current_node_hash] = True
-                except:
+                except Exception as e:
                     print("Failed to process function :", func_name)
-                    print(return_type)
+                    print(str(e))
                     return False
 
     def PARM_DECL_handler(self, current_node_hash):
@@ -170,14 +173,14 @@ class TypeDefinitionTree:
 
             if result.peek():
                 try:
-                    print()
                     var_type, name = self.bv.parse_type_string(result.peek()['type_definition'] +
                                                                " " + result.peek()['type_name'])
                     self.bv.define_user_type(name, var_type)
                     self.type_definition_cache[current_node_hash] = True
                     return True
-                except:
+                except Exception as e:
                     print("Failed to define a user type for function parameter with hash ", current_node_hash)
+                    print(str(e))
                     return False
 
     def BaseType_handler(self, current_node_hash):
@@ -201,7 +204,9 @@ class TypeDefinitionTree:
                 # If the type was added successfully, mark it in the cache
                 self.type_definition_cache[current_node_hash] = True
                 return True
-            except:
+            except Exception as e:
+                print('Failed to define the BaseType: ', type_definition + " " + type_name)
+                print(str(e))
                 return False
 
     def POINTER_handler(self, current_node_hash):
@@ -240,9 +245,10 @@ class TypeDefinitionTree:
                     try:
                         # add member - name, value
                         enum.append(record['field_name'], record['enum_index'])
-                    except:
+                    except Exception as e:
                         print(
                             "Cannot add enum member " + record['field_name'] + 'in enum with hash ' + current_node_hash)
+                        print(str(e))
                         return False
             else:
                 print("Pointer has no target, current pointer hash: ", current_node_hash)
@@ -256,12 +262,17 @@ class TypeDefinitionTree:
                 self.bv.define_user_type(result.peek()['enum_name'], Type.enumeration_type(self.bv.arch, enum))
                 self.type_definition_cache[current_node_hash] = True
                 return True
-            except:
+            except Exception as e:
+                print("ENUM_DECL_handler: Failed to define enum. " + str(e))
                 return False
 
     def STRUCT_DECL_handler(self, current_node_hash):
 
         with self.driver.session() as session:
+            struct_name = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash}}) "
+                                      "RETURN struct.TypeName as struct_name",
+                                      current_node_hash=current_node_hash).peek()['struct_name']
+
             result = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash}})-[:FieldDef]->"
                                  "(struct_field:StructFieldDecl) "
                                  "RETURN struct_field.Hash as field_hash, "
@@ -271,10 +282,11 @@ class TypeDefinitionTree:
 
             if result.peek():
                 # Structs can be recursively defined. In order to avoid such a situation the struct is
-                # immitiatly inserted into the cache instead of waiting for the full definition.
+                # immediately inserted into the cache instead of waiting for the full definition.
                 self.type_definition_cache[current_node_hash] = True
 
                 struct = types.Structure()
+                self.bv.define_user_type(struct_name, Type.structure_type(types.Structure()))
 
                 for record in result:
                     if self.insert_type_definition_into_binaryView('StructFieldDecl', record['field_hash']):
@@ -288,25 +300,27 @@ class TypeDefinitionTree:
                         var_type, name = self.bv.parse_type_string(
                             record['type_definition'] + " " + record['type_name'])
                         struct.append(var_type, str(name))
-                    except:
+                    except Exception as e:
+                        print("STRUCT_DECL_handler: Failed to add a struct member" + str(e))
                         return False
             else:
                 print("Struct has no target, current struct hash: ", current_node_hash)
                 return False
 
-            result = session.run("MATCH (struct:STRUCT_DECL {Hash: {current_node_hash}}) "
-                                 "RETURN struct.TypeName as struct_name",
-                                 current_node_hash=current_node_hash)
-
             try:
-                self.bv.define_user_type(result.peek()['struct_name'], Type.structure_type(struct))
+                self.bv.define_user_type(struct_name, Type.structure_type(struct))
                 return True
-            except:
+            except Exception as e:
+                print("STRUCT_DECL_handler: Failed to define Struct. " + str(e))
                 return False
 
     def UNION_DECL_handler(self, current_node_hash):
 
         with self.driver.session() as session:
+            union_name = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash}}) "
+                                     "RETURN union.TypeName as union_name",
+                                     current_node_hash=current_node_hash).peek()['union_name']
+
             result = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash}})-[:FieldDef]->"
                                  "(union_field) "
                                  "RETURN union_field.Hash as field_hash, "
@@ -323,6 +337,7 @@ class TypeDefinitionTree:
                 struct = types.Structure()
                 # set type to union
                 struct.type = types.StructureType.UnionStructureType
+                self.bv.define_user_type(union_name, Type.structure_type(types.Structure()))
 
                 for record in result:
                     if self.insert_type_definition_into_binaryView(record['field_label'], record['field_hash']):
@@ -336,20 +351,19 @@ class TypeDefinitionTree:
                         var_type, name = self.bv.parse_type_string(
                             record['type_definition'] + " " + record['type_name'])
                         struct.append(var_type, str(name))
-                    except:
+                    except Exception as e:
+                        print(record['type_definition'] + "   " + record['type_name'])
+                        print("UNION_DECL_handler: Failed to add union member. " + str(e))
                         return False
             else:
                 print("Union has no target, current Union hash: ", current_node_hash)
                 return False
 
-            result = session.run("MATCH (union:UNION_DECL {Hash: {current_node_hash}}) "
-                                 "RETURN union.TypeName as union_name",
-                                 current_node_hash=current_node_hash)
-
             try:
-                self.bv.define_user_type(result.peek()['union_name'], Type.structure_type(struct))
+                self.bv.define_user_type(union_name, Type.structure_type(struct))
                 return True
-            except:
+            except Exception as e:
+                print("UNION_DECL_handler: Failed to define union. " + str(e))
                 return False
 
     def TYPEDEF_DECL_handler(self, current_node_hash):
@@ -384,7 +398,8 @@ class TypeDefinitionTree:
                     self.bv.define_user_type(name, var_type)
                     self.type_definition_cache[current_node_hash] = True
                     return True
-                except:
+                except Exception as e:
+                    print(str(e))
                     print("Failed to define a user type for typedef with hash ", current_node_hash)
                     return False
 
@@ -449,6 +464,7 @@ class TypeDefinitionTree:
                 for record in result:
                     if self.insert_type_definition_into_binaryView(record['field_label'], record['field_hash']):
                         self.type_definition_cache[record['field_hash']] = True
+                        return True
                     else:
                         print("Failed to insert definition for struct field ", record['field_hash'])
                         return False
@@ -456,18 +472,21 @@ class TypeDefinitionTree:
                 print("Failed to find struct field definition, struct hash:  ", current_node_hash)
                 return False
 
-            result = session.run("MATCH (field:StructFieldDecl {Hash: {current_node_hash}}) "
-                                 "RETURN field.TypeName as field_name, "
-                                 "       field.TypeDefinition as field_definition",
-                                 current_node_hash=current_node_hash)
+            # result = session.run("MATCH (field:StructFieldDecl {Hash: {current_node_hash}}) "
+            #                     "RETURN field.TypeName as field_name, "
+            #                     "       field.TypeDefinition as field_definition",
+            #                     current_node_hash=current_node_hash)
 
-            try:
-                var_type, name = self.bv.parse_type_string(result['field_definition'] + " " + record['field_name'])
-                self.bv.define_user_type(name, var_type)
-                self.type_definition_cache[current_node_hash] = True
-                return True
-            except:
-                return False
+            # try:
+            #    print(result.peek()['field_definition'] + " " + result.peek()['field_name'])
+            #    var_type, name = self.bv.parse_type_string(result.peek()['field_definition'] +
+            #                                               " " + result.peek()['field_name'])
+            #    self.bv.define_user_type(name, var_type)
+            #    self.type_definition_cache[current_node_hash] = True
+            #    return True
+            # except Exception as e:
+            #    print("StructFieldDecl_handler:" + str(e))
+            #    return False
 
     def VAR_DECL_handler(self, current_node_hash):
 
