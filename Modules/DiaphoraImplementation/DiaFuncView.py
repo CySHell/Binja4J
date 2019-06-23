@@ -3,8 +3,8 @@ import Configuration
 
 
 class DiaFunc:
-    # This class is the main object that all heuristics will work with.
-    # This class has 2 main functions:
+    # This class is the export_bv object that all heuristics will work with.
+    # This class has 2 export_bv functions:
     #   1. obtain (from a neo4j DB) and represent all relevant information regarding a RootFunction, in order to allow
     #      efficient similarity testing.
     #   2. Populate a neo4j DB RootFunction object with a special node (node label: "DiaFuncInfo", relationship type: "Dia")
@@ -142,7 +142,7 @@ class DiaFunc:
 
 
 if __name__ == "__main__":
-    driver = GraphDatabase.driver(Configuration.uri, auth=(Configuration.user, Configuration.password),
+    driver = GraphDatabase.driver(Configuration.analysis_database_uri, auth=(Configuration.analysis_database_user, Configuration.analysis_database_password),
                                   max_connection_lifetime=60, max_connection_pool_size=1000,
                                   connection_acquisition_timeout=30)
     df = DiaFunc(driver, 'fb1a0415-cb75-46c3-bb43-39055ec8c370', 'Populate')
