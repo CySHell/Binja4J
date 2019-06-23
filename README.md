@@ -3,6 +3,11 @@
 This project aims to leverage both the static analysis capabilities of the Binary Ninja platform and the Graph DB capabilities of Neo4j.
 The combination of these powerful tools will hopefully allow for sophisticated and efficient program analysis algorithms to be developed.
 
+Before the graph is populated, It is possible to utilize a tool that parses any c header file and stores the definition within the graph, and then defines all recognized functions within the BinaryView. 
+Following is a demo of this capability after parsing all windows headers (windows.h): 
+![image](https://user-images.githubusercontent.com/34336222/59976825-63b52f00-95d2-11e9-9573-ecda09866dca.gif)
+
+
 Please note that only MEDIUM LEVEL IL (MLIL) exporting is supported, not raw assembly. 
 
   REQUIREMENTS:
