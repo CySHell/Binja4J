@@ -18,6 +18,7 @@
           <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.Type" />
           <option value="clang.cindex.CursorKind.PARM_DECL" />
           <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.BinaryView" />
+          <option value="TypeSystem.LibraryFunctionCorrelation.NodeHandlers.enums" />
         </list>
       </option>
     </inspection_tool>

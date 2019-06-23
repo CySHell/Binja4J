@@ -299,7 +299,7 @@ def handle_function_proto(type, parent_node_hash, relationship_type):
     type_handles[type.get_result().kind](type.get_result(), current_node_hash, 'ReturnType')
 
     for argument in type.argument_types():
-        type_handles[argument.kind](argument, current_node_hash, 'Function_Argument')
+        type_handles[argument.kind](argument, current_node_hash, 'FunctionArgument')
 
 
 #########################################################################

@@ -19,12 +19,22 @@ driver = GraphDatabase.driver(Configuration.analysis_database_uri,
 
 class TypeDefinitionTree:
     type_definition_cache = dict()
+    type_definition_cache_bv_reference = None
+    driver = GraphDatabase.driver(Configuration.analysis_database_uri,
+                                  auth=(Configuration.analysis_database_user,
+                                        Configuration.analysis_database_password))
 
-    def __init__(self, type_name: str, driver, bv):
+    def __init__(self, type_name: str, bv):
         self.type_name = type_name
-        self.driver = driver
         self.node_label_map = GraphNodeInformation.get_node_label_map(self.driver)
         self.bv = bv
+        if not self.type_definition_cache_bv_reference == str(bv):
+            # Each binary view holds its own defined types, so if we open up two different binary views
+            # the types defined for one of them are not automatically transferred to the other.
+            # By cleaning the cache for a new binary view we ensure that the script will re-define all necessary
+            # definitions for the new bv.
+            self.type_definition_cache_bv_reference = str(bv)
+            self.type_definition_cache = dict()
 
     def insert_type_definition_into_binaryView(self, current_node_label=None, current_node_hash=None):
         """
@@ -71,13 +81,12 @@ class TypeDefinitionTree:
             if result.peek():
                 for record in result:
                     # If parameter type is already defined move on to the next parameter
-                    if self.type_definition_cache.get(record['param_hash']):
-                        continue
-                    if self.insert_type_definition_into_binaryView('PARM_DECL', record['param_hash']):
-                        self.type_definition_cache[record['param_hash']] = True
-                    else:
-                        print("Failed to insert definition for function parameter ", record['type_name'])
-                        return False
+                    if not self.type_definition_cache.get(record['param_hash']):
+                        if self.insert_type_definition_into_binaryView('PARM_DECL', record['param_hash']):
+                            self.type_definition_cache[record['param_hash']] = True
+                        else:
+                            print("Failed to insert definition for function parameter ", record['type_name'])
+                            return False
 
                     try:
                         # Define the Function parameter binaryNinja object
@@ -109,20 +118,20 @@ class TypeDefinitionTree:
                             print("Failed to insert definition for function return value ", record['type_name'])
                             return False
 
-                        try:
-                            # Define the Function return value binaryNinja type object
-                            if record['type_definition'] == 'PointerTo':
-                                # Return type is a pointer
-                                var_type, name = self.bv.parse_type_string(record['type_name'][:-1])
-                                return_type = Type.pointer(self.bv.arch, var_type)
-                            else:
-                                var_type, name = self.bv.parse_type_string(
-                                    record['type_definition'] + " " + record['type_name'])
-                                self.bv.define_user_type(name, var_type)
-                                return_type = Type.named_type_from_type(name, self.bv.get_type_by_name(name))
-                        except Exception as e:
-                            print("FUNCTION_DECL_handler: Failed to process return value, " + str(e))
-                            return False
+                    try:
+                        # Define the Function return value binaryNinja type object
+                        if record['type_definition'] == 'PointerTo':
+                            # Return type is a pointer
+                            var_type, name = self.bv.parse_type_string(record['type_name'][:-1])
+                            return_type = Type.pointer(self.bv.arch, var_type)
+                        else:
+                            var_type, name = self.bv.parse_type_string(
+                                record['type_definition'] + " " + record['type_name'])
+                            self.bv.define_user_type(name, var_type)
+                            return_type = Type.named_type_from_type(name, self.bv.get_type_by_name(name))
+                    except Exception as e:
+                        print("FUNCTION_DECL_handler: Failed to process return value, " + str(e))
+                        return False
             else:
                 # A function might not have any return value or arguments
                 pass
@@ -140,11 +149,18 @@ class TypeDefinitionTree:
                             func_cc = func.calling_convention
                             function_type = Type.function(return_type, function_parameter_list, func_cc)
                             func.set_user_type(function_type)
+                            if not self.fix_tailcall(func, function_parameter_list, return_type, func_cc):
+                                return False
                     self.type_definition_cache[current_node_hash] = True
                 except Exception as e:
                     print("Failed to process function :", func_name)
                     print(str(e))
                     return False
+
+        print("Successfully defined function: ", func_name)
+
+
+        return True
 
     def PARM_DECL_handler(self, current_node_hash):
 
@@ -193,6 +209,10 @@ class TypeDefinitionTree:
             if result.peek():
                 type_definition = result.peek()['type_definition']
                 type_name = result.peek()['type_name']
+
+                if type_definition == 'const void':
+                    # Edge case, the binja c parser doesn't accept const as a storage type for void
+                    type_definition = 'void'
             else:
                 print("No such node hash in the graph: ", current_node_hash)
                 return False
@@ -227,8 +247,9 @@ class TypeDefinitionTree:
                 # Add pointer node to cache, no need to feed it into the binaryView
                 self.type_definition_cache[current_node_hash] = True
                 return True
-
-            return False
+            else:
+                print("Failed to define the target of the pointer. target hash is: ", pointee_hash)
+                return False
 
     def ENUM_DECL_handler(self, current_node_hash):
 
@@ -472,38 +493,87 @@ class TypeDefinitionTree:
                 print("Failed to find struct field definition, struct hash:  ", current_node_hash)
                 return False
 
-            # result = session.run("MATCH (field:StructFieldDecl {Hash: {current_node_hash}}) "
-            #                     "RETURN field.TypeName as field_name, "
-            #                     "       field.TypeDefinition as field_definition",
-            #                     current_node_hash=current_node_hash)
-
-            # try:
-            #    print(result.peek()['field_definition'] + " " + result.peek()['field_name'])
-            #    var_type, name = self.bv.parse_type_string(result.peek()['field_definition'] +
-            #                                               " " + result.peek()['field_name'])
-            #    self.bv.define_user_type(name, var_type)
-            #    self.type_definition_cache[current_node_hash] = True
-            #    return True
-            # except Exception as e:
-            #    print("StructFieldDecl_handler:" + str(e))
-            #    return False
-
     def VAR_DECL_handler(self, current_node_hash):
 
         print("Not handling definition of VAR_DECL with hash: ", current_node_hash)
         return True
 
+    def FUNCTIONPROTO_OR_FUNCTIONNOPROTO_handler(self, current_node_hash):
+        # No need to define the actual function in the binary view, since that will be taken care of
+        # by this nodes' parent Typedef node
+        with self.driver.session() as session:
+            result = session.run("MATCH (func {Hash: {current_node_hash}})-[:FunctionArgument]->"
+                                 "(func_param) "
+                                 "RETURN func_param.Hash as param_hash, "
+                                 "       labels(func_param)[0] as param_label, "
+                                 "       func_param.TypeDefinition as type_definition,"
+                                 "       func_param.TypeName as type_name ",
+                                 current_node_hash=current_node_hash)
+
+            # Parse function arguments
+            if result.peek():
+                for record in result:
+                    # If parameter type is already defined move on to the next parameter
+                    if self.type_definition_cache.get(record['param_hash']):
+                        continue
+                    if self.insert_type_definition_into_binaryView(record['param_label'], record['param_hash']):
+                        self.type_definition_cache[record['param_hash']] = True
+                    else:
+                        print("Failed to insert definition for function parameter ", record['type_name'])
+                        return False
+
+            # Parse return value
+            result = session.run("MATCH (func {Hash: {current_node_hash}})-[:ReturnType]->"
+                                 "(return_type) "
+                                 "RETURN return_type.Hash as return_hash, "
+                                 "       labels(return_type)[0] as return_label, "
+                                 "       return_type.TypeDefinition as type_definition, "
+                                 "       return_type.TypeName as type_name ",
+                                 current_node_hash=current_node_hash)
+
+            if result.peek():
+                for record in result:
+                    # If return type is already defined move on, otherwise define it
+                    if not self.type_definition_cache.get(record['return_hash']):
+                        if self.insert_type_definition_into_binaryView(record['return_label'],
+                                                                       record['return_hash']):
+                            self.type_definition_cache[record['return_hash']] = True
+                        else:
+                            print("Failed to insert definition for function return value ", record['type_name'])
+                            return False
+        return True
+
     def FUNCTIONPROTO_handler(self, current_node_hash):
 
-        print("Not handling definition of FUNCTIONPROTO with hash: ", current_node_hash)
-        return True
+        if self.FUNCTIONPROTO_OR_FUNCTIONNOPROTO_handler(current_node_hash):
+            return True
+        else:
+            return False
 
     def FUNCTIONNOPROTO_handler(self, current_node_hash):
 
-        print("Not handling definition of FUNCTIONNOPROTO with hash: ", current_node_hash)
+        if self.FUNCTIONPROTO_OR_FUNCTIONNOPROTO_handler(current_node_hash):
+            return True
+        else:
+            return False
+
+    def fix_tailcall(self, func, function_parameter_list, return_type, func_cc):
+        # PE's sometimes use a tailcall that jumps to the IAT\GOT entry of the function.
+        # This function will label the tailcall as the same type as the function its jumping into (since its not
+        # changing any registers\variables).
+        xref_list = self.bv.get_code_refs(func.start)
+        if len(xref_list) == 1:
+            caller_func = xref_list[0].function
+            if caller_func.mlil[0].operation == enums.MediumLevelILOperation.MLIL_TAILCALL:
+                # If the first instruction is a tailcall, then change the functions' type to the called function type
+                try:
+                    function_type = Type.function(return_type, function_parameter_list, func_cc)
+                    caller_func.set_user_type(function_type)
+                    caller_func.name = '__j_' + func.name
+                    return True
+                except Exception as e:
+                    print("Failed to fix the tailcall to function: ", func)
+                    print(str(e))
+                    return False
         return True
 
-
-if __name__ == '__main__':
-    function_decl_handler('722b9f4ec450100a')
-    print("a")

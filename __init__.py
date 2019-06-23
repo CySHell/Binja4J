@@ -14,7 +14,8 @@ from .TypeSystem.LibraryFunctionCorrelation import NodeHandlers
 def export_bv(bv):
     start_time = time.time()
 
-    driver = GraphDatabase.driver(Configuration.analysis_database_uri, auth=(Configuration.analysis_database_user, Configuration.analysis_database_password))
+    driver = GraphDatabase.driver(Configuration.analysis_database_uri,
+                                  auth=(Configuration.analysis_database_user, Configuration.analysis_database_password))
 
     uuid_obj = UUID_Generator.UUID(driver)
 
@@ -25,19 +26,15 @@ def export_bv(bv):
     end_time = time.time()
     print("Operation done in ", end_time - start_time, " seconds")
 
+
 def annotate_functions(bv):
-
     start_time = time.time()
-
-    driver = GraphDatabase.driver(Configuration.analysis_database_uri, auth=(Configuration.analysis_database_user, Configuration.analysis_database_password))
 
     for func in bv.functions:
         if not func.name.startswith('sub_'):
-            type_def_tree = NodeHandlers.TypeDefinitionTree(func.name, driver, bv)
+            type_def_tree = NodeHandlers.TypeDefinitionTree(func.name, bv)
             type_def_tree.insert_type_definition_into_binaryView()
-
-    #type_def_tree = NodeHandlers.TypeDefinitionTree('malloc', driver, bv)
-    #type_def_tree.insert_type_definition_into_binaryView()
+        bv.reanalyze()
 
     end_time = time.time()
     print("Operation done in ", end_time - start_time, " seconds")
