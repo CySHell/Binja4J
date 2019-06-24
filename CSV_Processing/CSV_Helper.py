@@ -90,6 +90,7 @@ class CSV_Serialize:
                 relationship_row = csv_template['mandatory_relationship_dict']
                 if csv_template['relationship_attributes']:
                     relationship_row.update(csv_template['relationship_attributes'])
+                if csv_template['mandatory_context_dict']:
                     relationship_row.update(csv_template['mandatory_context_dict'])
                 relationship_writer.writerow(relationship_row)
 

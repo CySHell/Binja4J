@@ -21,8 +21,6 @@ class Neo4jInstruction:
             self.relationship_label = 'InstructionChain'
             self.parent_instruction_uuid = context.RootBasicBlock
 
-
-
     def instr_hash(self):
         instruction_hash = xxhash.xxh64()
         instruction_hash.update(str(self.instr.operands) + str(self.instr.operation))

@@ -27,6 +27,7 @@ def create_constraints():
         session.run("CREATE CONSTRAINT ON (var:Variable) ASSERT var.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.HASH IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.UUID IS UNIQUE;")
+        session.sync()
 
 
 def create_nodes(filename):
@@ -39,6 +40,7 @@ def create_nodes(filename):
                                                                "SET node.UUID = row.UUID "
                                                                "RETURN true "
                     )
+        session.sync()
 
 
 def create_relationships(filename):
@@ -83,7 +85,8 @@ def create_batch_relationships(batch_rows):
                 # TODO: figure out how to do this more efficiently
                 for row in batch_rows:
                     session.run("MATCH (start:" + row['StartNodeLabel'] + " {UUID: $start_id}) "
-                                                      "MATCH (end:" + row['EndNodeLabel'] + " {UUID: $end_id}) "
+                                                                          "MATCH (end:" + row[
+                                    'EndNodeLabel'] + " {UUID: $end_id}) "
                                                       "CALL apoc.merge.relationship(start, $row_type,"
                                                       " {START_ID: start.UUID, "
                                                       "END_ID: end.UUID, TYPE: $row_type}, $row, end) yield rel "
@@ -101,6 +104,7 @@ def create_batch_relationships(batch_rows):
                 continue
 
         print("Exceeded retry count for committing relationships")
+        session.sync()
 
 
 def BinaryViewExists():
@@ -114,9 +118,8 @@ def BinaryViewExists():
 
 def GraphCleanup():
     # Clean up all the helper attributes from the graph
-    node_attributes_to_clean = ['LABEL', 'UUID', 'RootFunction', 'RootBasicBlock', 'RootInstruction', 'RootExpression']
-    relationship_attributes_to_clean = ['START_ID', 'END_ID', 'TYPE', 'StartNodeLabel', 'EndNodeLabel',
-                                        'RootFunction', 'RootBasicBlock', 'RootInstruction', 'RootExpression']
+    node_attributes_to_clean = ['LABEL', 'RootFunction', 'RootBasicBlock', 'RootInstruction', 'RootExpression']
+    relationship_attributes_to_clean = ['START_ID', 'END_ID', 'TYPE', 'StartNodeLabel', 'EndNodeLabel']
 
     fname = '\'file:/BinaryView-nodes.csv\''
     node_cypher_expression = ''
@@ -131,9 +134,9 @@ def GraphCleanup():
 
     with driver.session() as session:
         session.run("LOAD CSV WITH HEADERS FROM " + fname + "AS row "
-                    "MATCH (n)-[rel {RootBinaryView: row.UUID}]->() " + cypher_expression)
+                                                            "MATCH (n)-[rel {RootBinaryView: row.UUID}]->() " + cypher_expression)
+        session.sync()
 
-        #session.run("MATCH ()-[rel]-() " + relationship_cypher_expression)
 
 if __name__ == "__main__":
     start_time = time.time()

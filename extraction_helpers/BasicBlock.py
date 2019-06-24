@@ -1,6 +1,7 @@
 from binaryninja import *
 import xxhash
 
+
 ################################################################################################################
 #                                       MLIL BASIC BLOCK                                                       #
 ################################################################################################################
@@ -13,12 +14,20 @@ class Neo4jBasicBlock:
         """
         self.UUID = uuid
         self.bb = bb
-        self.relationship_label = 'MemberBB' if not bb.incoming_edges else 'Branch'
+        self.relationship_label = 'MemberBB' if bb.index == 0 else 'Branch'
         self.context = context
-        self.parent_bb_uuid = context.RootBasicBlock if context.RootBasicBlock else context.RootFunction
+        self.parent_bb_uuid = self.context.RootFunction if bb.index == 0 else self.context.RootBasicBlock
+        if not self.parent_bb_uuid:
+            print(vars(context))
+            print("bb object: " , bb)
+            print("UUID: ", self.UUID)
         self.branch_condition_enum = branch_condition_enum
         self.NODE_HASH, self.RELATIONSHIP_HASH = self.bb_hash()
         self.BackEdge = back_edge
+
+        # Remove irrelevant information from the context object
+        self.context.RootInstruction = ''
+        self.context.RootExpression = ''
 
     def bb_hash(self):
         node_hash = xxhash.xxh64()
@@ -66,5 +75,3 @@ class Neo4jBasicBlock:
         }
 
         return csv_template
-
-

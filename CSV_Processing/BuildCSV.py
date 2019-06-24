@@ -14,7 +14,8 @@ class BinjaGraph:
     #   The BinjaGraph object holds the export_bv functionality of the whole plugin:
     #   1. Traverse the BinaryView and map all the objects to several CSV files
     #   2. Determine the relationships between all objects in the BinaryView
-    #   3. Collect any additional information requested by the analysis_database_user from each object (via the /extraction_helpers)
+    #   3. Collect any additional information requested by the analysis_database_user
+    #      from each object (via the /extraction_helpers)
 
     def __init__(self, driver, uuid_generator, bv):
         """
@@ -85,25 +86,24 @@ class BinjaGraph:
             current_context.RootFunction = func_object.UUID
 
             success = self.CSV_serializer.serialize_object(func_object.serialize())
-            bb_control_flow_graph = [(func.mlil.basic_blocks[0], 0)]
+            bb_control_flow_graph = [(func.mlil.basic_blocks[0], 0, current_context.RootFunction)]
             processed_bb_list = []
             if success:
-
-
 
                 # Iterate over all basic blocks in the RootFunction and create the relationships
                 # between them according to the control flow graph (I.E with branches between basic blocks)
                 current_bb = bb_control_flow_graph.pop()
                 while current_bb:
+                    current_context.RootBasicBlock = current_bb[2]
                     bb_list, _ = self.bb_extract(current_bb[0], current_bb[1], current_context)
-                    bb_recursion_halt = False
                     for bb in bb_list:
                         if bb in processed_bb_list:
-                            bb_recursion_halt = True
+                            bb_list.remove(bb)
 
-                    if not bb_recursion_halt:
+                    if bb_list:
                         bb_control_flow_graph.extend(bb_list)
                         processed_bb_list.extend(bb_list)
+
                     if bb_control_flow_graph:
                         current_bb = bb_control_flow_graph.pop()
 
@@ -144,18 +144,26 @@ class BinjaGraph:
             relationship_exists = self.branch_rel_cache.get(bb_object.RELATIONSHIP_HASH)
 
             if not relationship_exists:
-                self.CSV_serializer.serialize_object(bb_object.serialize(), False, write_relationship=True)
-                self.branch_rel_cache.update({bb_object.RELATIONSHIP_HASH: True})
+                success = self.CSV_serializer.serialize_object(bb_object.serialize(),
+                                                               write_node=False, write_relationship=True)
+                if success:
+                    # Update context and cache
+                    context.RootBasicBlock = bb_object.UUID
+                    self.branch_rel_cache.update({bb_object.RELATIONSHIP_HASH: True})
 
-            # Update context
-            context.RootBasicBlock = bb_object.UUID
+                    # create new relationships for the RootInstruction chain under the BB
+                    for instruction in basic_block:
+                        context.RootInstruction = self.instruction_extract(instruction, context)
+
+        # Update context
+        context.RootBasicBlock = bb_object.UUID
 
         outgoing_edges_list = []
         # Iterate all branches of the current basic block and create them
         for branch in basic_block.outgoing_edges:
             if branch.back_edge is False:
                 # if the branch isn't a back_edge just add it to the list to be processed in the future
-                branch_struct = [branch.target, branch.type.value, context]
+                branch_struct = [branch.target, branch.type.value, context.RootBasicBlock]
                 outgoing_edges_list.append(branch_struct)
             else:
                 # branch is a back_edge, so the basic_block it points to already exists.
@@ -203,7 +211,7 @@ class BinjaGraph:
                 context.RootExpression = instr_object.UUID
                 self.instruction_cache.update({instr_object.HASH: str(instr_object.UUID)})
 
-                # Each RootInstruction is further extracted into an RootExpression (a bit like an AST)
+                # Each RootInstruction is further extracted into an RootExpression (like an AST)
                 self.expression_extract(instruction, context, 0, parent_node_type='Instruction')
         else:
             instr_object = Instruction.Neo4jInstruction(instruction, hash_exists,
@@ -215,10 +223,12 @@ class BinjaGraph:
     def expression_extract(self, instruction, context: ContextManagement.Context, operand_index,
                            parent_node_type='Expression'):
         """
-        An RootExpression is a breakdown of an MLIL RootInstruction into its individual operands under a single operation
+        An RootExpression is a breakdown of an MLIL RootInstruction into its individual operands under a single
+        operation
         :param instruction: BinaryNinja MLIL Insutrction object
         :param context
-        :param operand_index: (INT) index of the RootExpression within the parent RootInstruction or RootExpression operand list
+        :param operand_index: (INT) index of the RootExpression within the parent RootInstruction or RootExpression
+                                    operand list
         :param parent_node_type: (STR) parent of an RootExpression can be either an RootInstruction or an RootExpression
         """
         expr_object = Expression.Neo4jExpression(instruction, self.uuid_generator.get_uuid(),
@@ -305,12 +315,13 @@ class BinjaGraph:
                                                      operand_index)
             self.CSV_serializer.serialize_object(expr_object.serialize(), write_node=False, write_relationship=True)
 
-    def var_extract(self, var, uuid: str, index: int, parent_expr_uuid: str, context:ContextManagement.Context):
+    def var_extract(self, var, uuid: str, index: int, parent_expr_uuid: str, context: ContextManagement.Context):
         """
         :param var: BinaryNinja MLIL_VAR object
         :param uuid: UUID to give this VAR object within the CSV
         :param index: operand index of this var within the parent RootExpression operand list
-        :param parent_expr_uuid:
+        :param parent_expr_uuid
+        :param context
         """
 
         var_object = Variable.Neo4jVar(var, uuid, index, parent_expr_uuid, context)
