@@ -48,6 +48,10 @@ Please note that only MEDIUM LEVEL IL (MLIL) exporting is supported, not raw ass
 ![image](https://user-images.githubusercontent.com/34336222/58807914-aa41ea00-8621-11e9-877f-d92310b0296d.png)
   
   
-  Demo Screenshots
+  Demo:
   
   ![image](https://user-images.githubusercontent.com/34336222/56093138-59d5c800-5ecd-11e9-8de4-1d6256406d32.PNG)
+
+  The following is a demo of following the def\use chain of an argument to a 'memset' function:
+  
+  ![image](https://user-images.githubusercontent.com/34336222/60178215-a3268a00-9823-11e9-9eed-73fc5abe12d4.gif)
