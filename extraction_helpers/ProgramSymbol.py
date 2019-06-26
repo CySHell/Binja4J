@@ -54,5 +54,4 @@ class Neo4jSymbol:
                 'SymbolBinding': self.symbol.binding,
             },
         }
-
         return csv_template

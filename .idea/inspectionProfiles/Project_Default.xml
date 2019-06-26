@@ -6,6 +6,7 @@
         <list>
           <option value="TypeSystem.TypeInference.FunctionArgumentAliasing.binaryninja" />
           <option value="TypeSystem.TypeInference.FunctionArgumentAliasing.bv" />
+          <option value="CSV_Processing.PostProcessing.enums" />
         </list>
       </option>
     </inspection_tool>

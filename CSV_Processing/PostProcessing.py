@@ -1,4 +1,6 @@
-from ..extraction_helpers import Symbol, String, CallSite, UseDef
+from ..Common import ContextManagement
+from ..extraction_helpers import ProgramSymbol, String, CallSite, UseDef
+from binaryninja import *
 
 
 class CSVPostProcessor:
@@ -60,9 +62,9 @@ class CSVPostProcessor:
         for row in constant_nodes_iterator:
             symbol = symbol_mapping.get(str(row['ConstantValue']))
             if symbol:
-                symbol_object = Symbol.Neo4jSymbol(symbol, self.uuid_generator.get_uuid(),
-                                                   row['UUID'], row['LABEL'],
-                                                   self.binaryView_node_UUID)
+                symbol_object = ProgramSymbol.Neo4jSymbol(symbol, self.uuid_generator.get_uuid(),
+                                                          row['UUID'], row['LABEL'],
+                                                          self.binaryView_node_UUID)
                 hash_exists = self.symbol_cache.get(symbol_object.HASH)
 
                 if not hash_exists:
@@ -70,93 +72,11 @@ class CSVPostProcessor:
                     if success:
                         self.symbol_cache.update({symbol_object.HASH: str(symbol_object.UUID)})
                 else:
-                    symbol_object = Symbol.Neo4jSymbol(symbol, hash_exists, row['UUID'],
-                                                       row['LABEL'],
-                                                       self.binaryView_node_UUID)
+                    symbol_object = ProgramSymbol.Neo4jSymbol(symbol, hash_exists, row['UUID'],
+                                                              row['LABEL'],
+                                                              self.binaryView_node_UUID)
                     self.CSV_Serializer.serialize_object(symbol_object.serialize(), write_node=False,
                                                          write_relationship=True)
-
-    def add_call_relationships(self):
-
-        # Iterators over CSV files
-        expression_iterator = self.CSV_Serializer.csv_dict_row_iterator('Expression')
-        operand_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('Operand')
-        constant_iterator = self.CSV_Serializer.csv_dict_row_iterator('Constant')
-        constantOperand_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('ConstantOperand')
-        symbolRef_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('SymbolRef')
-        member_func_iterator = self.CSV_Serializer.csv_dict_row_iterator('MemberFunc')
-
-        # Cache dictionaries to speed up searches
-        callsite_expression_uuid_list = []
-        operand_relationship_cache = dict()
-        constantOperand_relationship_cache = dict()
-        symbolRef_relationship_cache = dict()
-        reverse_operand_relationship_cache = dict()
-
-        # Helper mappings
-        constant_uuid_to_value = dict()
-        function_address_to_uuid = dict()
-        expression_uuid_to_operation = dict()
-
-        # The chain of nodes describing a call to a RootFunction is:
-        # (:Instruction)-[:Operand {OperandIndex: '0']->
-        # (:Expression {OperationName: 'MLIL_CALL')-[:Operand]->
-        # (:Expression {OperationName: 'MLIL_CONST'|'MLIL_CONST_PTR'})-[ConstantOperand]->
-        # (:Constant {ConstantValue: <>}) ?-[:SymbolRef]-> (:Symbol)
-
-        # init Caches
-        for row in operand_relationship_iterator:
-            operand_relationship_cache.update({row['START_ID']: row})
-            # This cache is responsible for mapping the RootExpression node back to the original RootInstruction node
-            reverse_operand_relationship_cache.update({row['END_ID']: row})
-
-        for row in constantOperand_relationship_iterator:
-            constantOperand_relationship_cache.update({row['START_ID']: row})
-
-        for row in symbolRef_relationship_iterator:
-            symbolRef_relationship_cache.update({row['START_ID']: row})
-
-        for row in constant_iterator:
-            constant_uuid_to_value.update({row['UUID']: row['ConstantValue']})
-
-        for row in member_func_iterator:
-            function_address_to_uuid.update({row['Offset']: row['END_ID']})
-
-        # Map each call RootInstruction node to the corresponding RootFunction being called.
-
-        for row in expression_iterator:
-            if row['OperationName'] == 'MLIL_CALL':
-                callsite_expression_uuid_list.append(row['UUID'])
-            else:
-                expression_uuid_to_operation.update({row['UUID']: row['OperationName']})
-
-        for callsite_expression_uuid in callsite_expression_uuid_list:
-            operand_relationship_call_target_expression_node = operand_relationship_cache.get(callsite_expression_uuid)
-            callsite_instruction = reverse_operand_relationship_cache.get(callsite_expression_uuid)
-
-            # MLIL_CALL first operand is the argument describing the address of the RootFunction being called
-            if operand_relationship_call_target_expression_node['OperandIndex'] == '1':
-                constant_node = constantOperand_relationship_cache.get(operand_relationship_call_target_expression_node['END_ID'])
-                if constant_node:
-                    constant_node_uuid = constant_node['END_ID']
-                    constant_value = constant_uuid_to_value.get(constant_node_uuid)
-                    called_function_uuid = function_address_to_uuid.get(constant_value)
-
-                    if called_function_uuid:
-                        callsite_object = CallSite.Neo4jCallSite(callsite_instruction['START_ID'], called_function_uuid
-                                                                 , self.binaryView_node_UUID)
-                        self.CSV_Serializer.serialize_object(callsite_object.serialize(), write_node=False,
-                                                             write_relationship=True)
-                    else:
-                        # TODO: constant_value is usually pointing to the IAT\GOT directly (in the data section),
-                        #       so no RootFunction address is recognized.
-                        #       Add code to handle this.
-                        pass
-                else:
-                    # TODO: if constant_node doesn't exist, it means we are dealing with an indirect RootFunction
-                    #       call, and the calling RootFunction is specified by an MLIL_VAR.
-                    #       Add code to handle this situation.
-                    pass
 
     def create_use_def_chain(self):
         # Create a relationship from an instruction node to the variable that it defines and\or uses.
@@ -166,9 +86,6 @@ class CSVPostProcessor:
         var_operand_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('VarOperand')
         instruction_chain_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('InstructionChain')
         next_instruction_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('NextInstruction')
-        #variable_iterator = self.CSV_Serializer.csv_dict_row_iterator('Variable')
-        #instruction_iterator = self.CSV_Serializer.csv_dict_row_iterator('Instruction')
-
 
         # Cache dictionaries to speed up searches
         function_instruction_index_to_instruction_uuid = dict()
@@ -194,15 +111,80 @@ class CSVPostProcessor:
             variable_use_instruction_index_list = row['VariableUsedAtIndex'].split(',')
 
             for instruction_index in variable_definition_instruction_index_list:
-                instruction_uuid = function_instruction_index_to_instruction_uuid.get(root_function + str(instruction_index))
+                instruction_uuid = function_instruction_index_to_instruction_uuid.get(
+                    root_function + str(instruction_index))
 
                 def_chain_object = UseDef.Neo4jUseDef(variable_uuid, instruction_uuid, root_binary_view, 'DefinedAt')
                 self.CSV_Serializer.serialize_object(def_chain_object.serialize(), write_node=False,
                                                      write_relationship=True)
 
             for instruction_index in variable_use_instruction_index_list:
-                instruction_uuid = function_instruction_index_to_instruction_uuid.get(root_function + str(instruction_index))
+                instruction_uuid = function_instruction_index_to_instruction_uuid.get(
+                    root_function + str(instruction_index))
 
                 def_chain_object = UseDef.Neo4jUseDef(variable_uuid, instruction_uuid, root_binary_view, 'UsedAt')
                 self.CSV_Serializer.serialize_object(def_chain_object.serialize(), write_node=False,
                                                      write_relationship=True)
+
+    def add_call_relationships(self):
+
+        # Create helper CSV iterators
+        expression_iterator = self.CSV_Serializer.csv_dict_row_iterator('Expression')
+        operand_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('Operand')
+        constant_iterator = self.CSV_Serializer.csv_dict_row_iterator('Constant')
+        constantOperand_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('ConstantOperand')
+        member_func_relationship_iterator = self.CSV_Serializer.csv_dict_row_iterator('MemberFunc')
+
+        # define cache
+        expression_cache = dict()
+        operand_relationship_cache = dict()
+        constant_cache = dict()
+        constantOperand_relationship_cache = dict()
+        member_func_relationship_cache = dict()
+
+        # init cache
+        for row in expression_iterator:
+            expression_cache.update({row['UUID']: row})
+
+        for row in constant_iterator:
+            constant_cache.update({row['UUID']: row})
+
+        for row in operand_relationship_iterator:
+            if row['OperandIndex'] == '1':
+                # Only the first operand of MLIL_CALL expression intrests us, as it holds the address of the callee
+                operand_relationship_cache.update({row['START_ID']: row})
+
+        for row in constantOperand_relationship_iterator:
+            constantOperand_relationship_cache.update({row['START_ID']: row['END_ID']})
+
+        for row in member_func_relationship_iterator:
+            member_func_relationship_cache.update({row['Offset']: row['END_ID']})
+
+        for row in self.CSV_Serializer.csv_dict_row_iterator('Expression'):
+            # Iterate all expressions to locate the function calls
+            if row['OperationName'] == 'MLIL_CALL':
+                expression_first_operand = operand_relationship_cache.get(row['UUID'])
+                callee_address_expression = expression_cache.get(expression_first_operand['END_ID'])
+                if callee_address_expression:
+                    if callee_address_expression['OperationName'] == 'MLIL_CONST_PTR':
+                        constant_expression = constant_cache.get(
+                            constantOperand_relationship_cache.get(
+                                callee_address_expression['UUID']
+                            ))
+                        if constant_expression:
+                            callee_func_uuid = member_func_relationship_cache.get(constant_expression['ConstantValue'])
+                            if callee_func_uuid:
+                                context = ContextManagement.Context(expression_first_operand['RootBinaryView'],
+                                                                    expression_first_operand['RootFunction'],
+                                                                    expression_first_operand['RootBasicBlock'],
+                                                                    expression_first_operand['RootInstruction'],
+                                                                    expression_first_operand['RootExpression'])
+                                callsite_object = CallSite.Neo4jCallSite(expression_first_operand['RootInstruction'],
+                                                                         callee_func_uuid
+                                                                         , context)
+                                self.CSV_Serializer.serialize_object(callsite_object.serialize(), write_node=False,
+                                                                     write_relationship=True)
+                    else:
+                        # TODO: if the mlil operation is something like 'MLIL_VAR' it means we have an idirect call.
+                        #       Add heuristics to understand the function being pointed.
+                        pass

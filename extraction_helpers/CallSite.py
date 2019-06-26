@@ -8,10 +8,10 @@ import xxhash
 
 class Neo4jCallSite:
 
-    def __init__(self, callsite_instruction_node_uuid, called_function_node_uuid, binary_view_uuid):
+    def __init__(self, callsite_instruction_node_uuid, called_function_node_uuid, context):
         self.callsite_instruction_node_uuid = callsite_instruction_node_uuid
         self.called_function_node_uuid = called_function_node_uuid
-        self.binary_view_uuid = binary_view_uuid
+        self.context = context
 
     def serialize(self):
         csv_template = {
@@ -26,9 +26,7 @@ class Neo4jCallSite:
                 'EndNodeLabel': 'Function',
             },
 
-            'mandatory_context_dict': {
-                'RootBinaryView': self.binary_view_uuid,
-            },
+            'mandatory_context_dict': vars(self.context),
 
             'node_attributes': {
                 # stub, this class represents only a relationship

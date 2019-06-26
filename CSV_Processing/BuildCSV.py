@@ -261,7 +261,11 @@ class BinjaGraph:
                         index += 1
                         continue
                     if op_description_type == 'expr_list':
-                        # TODO: support this op type - it is a list of parameters for the given RootExpression
+                        expression_index = 0
+                        for expr in instruction.operands[index]:
+                            context.RootExpression = expr_object.UUID
+                            self.expression_extract(expr, context, 'func_param_' + str(expression_index))
+                            expression_index += 1
                         index += 1
                         continue
                     if op_description_type == 'var_list':
