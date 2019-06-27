@@ -1,0 +1,1224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="cc7abb9e-42f1-431e-812b-5cb009ee7577" name="Default Changelist" comment="- Work on Flow Analysis module">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Binja_Header_Define.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Common/ContextManagement.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Common/GraphNodeInformation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Common/UUID_Generator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/Common/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/CallSite.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Constant.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Function.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/String.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/UseDef.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Variable.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Modules/TypeInference/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Lib/tcl8.6/init.tcl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/Activate.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_asyncio.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_bz2.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_ctypes.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_ctypes_test.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_decimal.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_distutils_findvs.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_elementtree.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_hashlib.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_lzma.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_msi.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_multiprocessing.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_overlapped.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_socket.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_sqlite3.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_ssl.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testbuffer.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testcapi.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testconsole.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testimportmultiple.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testmultiphase.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/_tkinter.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/activate" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/activate.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/deactivate.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/pyexpat.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/python.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/python3.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/python36.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/pythonw.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/select.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/sqlite3.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/tcl86t.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/tk86t.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/unicodedata.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/vcruntime140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/Scripts/winsound.pyd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/venv/pyvenv.cfg" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="105">
+              <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>FUNCTION_DECL</find>
+      <find>defined func</find>
+      <find>struct_decl</find>
+      <find>not found in da</find>
+      <find>struct_field</find>
+      <find>print</find>
+      <find>print(e)</find>
+      <find>e)</find>
+      <find>pointer</find>
+      <find>field_decl</find>
+      <find>struct</find>
+      <find>union_</find>
+      <find>Struct</find>
+      <find>return value</find>
+      <find>typedef_</find>
+      <find>base_type</find>
+      <find>FunctionArgu</find>
+      <find>Function_Ar</find>
+      <find>functionproto</find>
+      <find>pointer_</find>
+      <find>functionpro</find>
+      <find>failed to process function</find>
+      <find>type_definition_cache</find>
+      <find>Return</find>
+      <find>Symbol</find>
+      <find>==</find>
+      <find>Core.</find>
+      <find>from . import Configuration</find>
+      <find>import Configuration</find>
+      <find>import Con</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>#print</replace>
+      <replace>''</replace>
+      <replace>.hexdigest()</replace>
+      <replace>.xxh64()</replace>
+      <replace>'rw'</replace>
+      <replace>'r+'</replace>
+      <replace>'w+'</replace>
+      <replace>string</replace>
+      <replace>symbol</replace>
+      <replace>CSV_Serializer</replace>
+      <replace>type_name=</replace>
+      <replace>'type_name'</replace>
+      <replace>(node_hash)</replace>
+      <replace>'PointerTo'</replace>
+      <replace>'FUNCTIONPROTO'</replace>
+      <replace>+ str(node_hash) +</replace>
+      <replace>HASH: '&quot;</replace>
+      <replace>return type_definition_cache</replace>
+      <replace>type_cache.get(str(args['type_name'] + args['type_definition'])):</replace>
+      <replace>self.type_definition_cache.get(</replace>
+      <replace>{current_node_hash}})</replace>
+      <replace>BinaryView</replace>
+      <replace>BinaryView.</replace>
+      <replace>self.bv.</replace>
+      <replace>except Exception as e:</replace>
+      <replace>str(e))</replace>
+      <replace>.Core.</replace>
+      <replace>from . import Configuration</replace>
+      <replace>from .. import Configuration</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\extraction_helpers</dir>
+      <dir>C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j</dir>
+    </dirStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Modules/BasicBlockNormalization/Main.py" />
+        <option value="$PROJECT_DIR$/Modules/UseDefChain-Relationship Creator/CreateUseDefChains.py" />
+        <option value="$PROJECT_DIR$/Modules/UseDefChain-Relationship Creator/Main.py" />
+        <option value="$PROJECT_DIR$/Modules/UseDefChain-Relationship Creator/UseDefChainsImplementation.py" />
+        <option value="$PROJECT_DIR$/Modules/MLIL_Function_Similarity/Entities/Function.py" />
+        <option value="$PROJECT_DIR$/Modules/DiaphoraImplementation/DiaFunc.py" />
+        <option value="$PROJECT_DIR$/Modules/DiaphoraImplementation/Heuristics/SimpleHashSimilarities.py" />
+        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch_5.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Data.py" />
+        <option value="$PROJECT_DIR$/CSV_Helper.py" />
+        <option value="$PROJECT_DIR$/binja_extraction.py" />
+        <option value="$PROJECT_DIR$/binja_extraction.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/BinaryView.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/String.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Expression.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Constant.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Function.py" />
+        <option value="$PROJECT_DIR$/ExportNeo4j.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Variable.py" />
+        <option value="$PROJECT_DIR$/Neo4j_Processing/PostProcessing.py" />
+        <option value="$PROJECT_DIR$/Common/ContextManagement.py" />
+        <option value="$PROJECT_DIR$/Modules/TypeEnrichment/HeaderFileParsing.py" />
+        <option value="$PROJECT_DIR$/TypeSystem/CorrelateLibraryFunctionInfo.py" />
+        <option value="$PROJECT_DIR$/TypeSystem/TypeEnrichment/HeaderFileParsing_neo4j_bolt_driver_refactor.py" />
+        <option value="$PROJECT_DIR$/Common/GraphNodeInformation.py" />
+        <option value="$PROJECT_DIR$/TypeSystem/LibraryFunctionCorrelation/CorrelateLibraryFunctionInfo.py" />
+        <option value="$PROJECT_DIR$/TypeSystem/TypeEnrichment/HeaderFileParsing.py" />
+        <option value="$PROJECT_DIR$/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py" />
+        <option value="$PROJECT_DIR$/TypeSystem/TypeInference/FunctionArgumentAliasing.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Instruction.py" />
+        <option value="$PROJECT_DIR$/CSV_Processing/CSV_Helper.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/BasicBlock.py" />
+        <option value="$PROJECT_DIR$/Neo4j_Processing/ExportNeo4j.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/Symbol.py" />
+        <option value="$PROJECT_DIR$/Configuration.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/CallSite.py" />
+        <option value="$PROJECT_DIR$/CSV_Processing/BuildCSV.py" />
+        <option value="$PROJECT_DIR$/extraction_helpers/UseDef.py" />
+        <option value="$PROJECT_DIR$/CSV_Processing/PostProcessing.py" />
+        <option value="$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VariableBackTrace.py" />
+        <option value="$PROJECT_DIR$/__init__.py" />
+        <option value="$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py" />
+        <option value="$PROJECT_DIR$/Modules/DiaphoraImplementation/DiaFuncView.py" />
+        <option value="$PROJECT_DIR$/Core/Common/Neo4jConnector.py" />
+        <option value="$PROJECT_DIR$/Modules/TypeInference/IntraProceduralInference.py" />
+        <option value="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" />
+        <option value="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" />
+        <option value="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py" />
+        <option value="$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py" />
+        <option value="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" />
+        <option value="$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-9" />
+    <option name="width" value="924" />
+    <option name="height" value="1034" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Binary Ninja - BV2Neo4j" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Binary Ninja - BV2Neo4j" type="462c0819:PsiDirectoryNode" />
+              <item name="Core" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Binary Ninja - BV2Neo4j" type="462c0819:PsiDirectoryNode" />
+              <item name="Core" type="462c0819:PsiDirectoryNode" />
+              <item name="Common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
+            </path>
+            <path>
+              <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
+              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
+              <item name="Scratches" type="d62648e6:ScratchProjectViewPane$MyRootNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Modules" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\TypeSystem\LibraryFunctionCorrelation" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\TypeSystem\TypeEnrichment" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\extraction_helpers" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\Modules" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\Core" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\TypeSystem\HeaderParsing" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\TypeSystem\LibraryFunctionCorrelation" />
+      <recent name="C:\Users\user\AppData\Roaming\Binary Ninja\plugins\Binary Ninja - BV2Neo4j\TypeSystem" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python.ExportNeo4j (1)">
+    <configuration name="ExportNeo4j (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Binary Ninja - BV2Neo4j" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Core/Neo4j_Processing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ExportNeo4j" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Binary Ninja - BV2Neo4j" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Neo4j_Processing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Neo4j_Processing/ExportNeo4j.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="HeaderFileParsing (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Binary Ninja - BV2Neo4j" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="HeaderFileParsing" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Binary Ninja - BV2Neo4j" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/TypeSystem/HeaderParsing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TypeSystem/HeaderParsing/HeaderFileParsing.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="NodeHandlers" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Binary Ninja - BV2Neo4j" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/TypeSystem/LibraryFunctionCorrelation" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.ExportNeo4j (1)" />
+        <item itemvalue="Python.ExportNeo4j" />
+        <item itemvalue="Python.HeaderFileParsing (1)" />
+        <item itemvalue="Python.HeaderFileParsing" />
+        <item itemvalue="Python.NodeHandlers" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cc7abb9e-42f1-431e-812b-5cb009ee7577" name="Default Changelist" comment="" />
+      <created>1553411536646</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1553411536646</updated>
+    </task>
+    <task id="LOCAL-00001" summary="- support for exporting the following elements:&#10;    BinaryView&#10;    MLIL Function&#10;    MLIL Basic Block&#10;    MLIL Instruction&#10;    MLIL Expression">
+      <created>1553690068806</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1553690068806</updated>
+    </task>
+    <task id="LOCAL-00002" summary="- added some debug info">
+      <created>1553697034412</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1553697034412</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Refactor in order to first dump BV to CSV file">
+      <created>1554213498360</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1554213498361</updated>
+    </task>
+    <task id="LOCAL-00004" summary="CSV dumping - no threading support">
+      <created>1554285890728</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1554285890728</updated>
+    </task>
+    <task id="LOCAL-00005" summary="added support for relationships">
+      <created>1554363723652</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1554363723652</updated>
+    </task>
+    <task id="LOCAL-00006" summary="added support for relationships">
+      <created>1554363740434</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1554363740434</updated>
+    </task>
+    <task id="LOCAL-00007" summary="- Fixed various bugs in CSV dumping&#10;- support the neo4j import csv tool">
+      <created>1554388671859</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1554388671859</updated>
+    </task>
+    <task id="LOCAL-00008" summary="- Major improvements to performance">
+      <created>1554966115644</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1554966115644</updated>
+    </task>
+    <task id="LOCAL-00009" summary="- Fixed some parsing bugs with Branch relationships&#10;- Fixed a collision between Var and Expression object labels">
+      <created>1554995708309</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1554995708309</updated>
+    </task>
+    <task id="LOCAL-00010" summary="- Fixed some bugs with variable parsing">
+      <created>1555244295698</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1555244295698</updated>
+    </task>
+    <task id="LOCAL-00011" summary="- Testing parallelism">
+      <created>1555425186583</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1555425186583</updated>
+    </task>
+    <task id="LOCAL-00012" summary="- Massive performance improvements&#10;- Refactor UUID_Generator class to use internal neo4j apoc procedure&#10;- Addressed multi-threading locking issues when competing for the same relationship nodes for insertions">
+      <created>1556454961662</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1556454961662</updated>
+    </task>
+    <task id="LOCAL-00013" summary="- Fixed handling of Transient Error and lock">
+      <created>1556608875325</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1556608875325</updated>
+    </task>
+    <task id="LOCAL-00014" summary="- Fixed some problems with BasicBlock branching&#10;- Added a Configuration file&#10;- Added comments to the code&#10;- Added plugin.json">
+      <created>1556636847732</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1556636847732</updated>
+    </task>
+    <task id="LOCAL-00015" summary="- Fixed an issue with MLIL_SET_VAR not being cached correctly">
+      <created>1556697744213</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1556697744213</updated>
+    </task>
+    <task id="LOCAL-00016" summary="- Version 1.0&#10;- Fixed a major issue with relationship creation within the DB">
+      <created>1556807021132</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1556807021132</updated>
+    </task>
+    <task id="LOCAL-00017" summary="- Version 1.1&#10;- Added &quot;Data&quot; nodes, currently supporting Constant nodes that are pointers to strings&#10;- Fixed a problem with correctly identifying Constant nodes&#10;- Started adding support for Diaphora implementation">
+      <created>1558881197414</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1558881197414</updated>
+    </task>
+    <task id="LOCAL-00018" summary="- Version 1.2&#10;- Refactor project structure&#10;- Added CSV Post Processing capabilities:&#10;    * Data Symbols and String pointers&#10;- Added Function call relationships (call instruction pointing to the called function)">
+      <created>1559469318034</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1559469318034</updated>
+    </task>
+    <task id="LOCAL-00019" summary="- Added Def\Use chains">
+      <created>1559573988851</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1559573988851</updated>
+    </task>
+    <task id="LOCAL-00020" summary="- Added initial support for Type enrichment, using clang pre-processor on a header file">
+      <created>1559657051220</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1559657051221</updated>
+    </task>
+    <task id="LOCAL-00021" summary="- working on integrating type data from a parsed header into the &#10;  binary view automatically">
+      <created>1560437314713</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1560437314713</updated>
+    </task>
+    <task id="LOCAL-00022" summary="- Complete refactor of the header parsing module:&#10;   * now uses neo4j bolt driver instead of py2neo&#10;   * extreme performance improvement&#10;- Working on defining the type definition tree for a    given type">
+      <created>1560779858649</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1560779858649</updated>
+    </task>
+    <task id="LOCAL-00023" summary="- refactor header processing module">
+      <created>1560779927824</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1560779927824</updated>
+    </task>
+    <task id="LOCAL-00024" summary="- bug fixes on node handlers">
+      <created>1561041970412</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1561041970413</updated>
+    </task>
+    <task id="LOCAL-00025" summary="- Added feature: define all known function in a binary view with full type information">
+      <created>1561289088368</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1561289088368</updated>
+    </task>
+    <task id="LOCAL-00026" summary="- Major bug fixes in the way BasicBlocks were parsed">
+      <created>1561384484069</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1561384484069</updated>
+    </task>
+    <task id="LOCAL-00027" summary="- A function call expression will not have sub expression representing the argument list for that function call">
+      <created>1561548974696</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1561548974696</updated>
+    </task>
+    <task id="LOCAL-00028" summary="- Work on Flow Analysis module">
+      <created>1561649189158</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1561649189158</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
+    <servers />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15455747" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4980185" weight="0.3281471" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4953765" weight="0.38755304" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.51343703" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32956153" />
+      <window_info anchor="bottom" id="Python Console" order="7" weight="0.3281471" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3281471" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.4993395" visible="true" weight="0.15275814" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5006605" side_tool="true" visible="true" weight="0.15275814" />
+      <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32956153" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout>
+    <layout-to-restore>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21466315" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4980185" weight="0.3281471" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4980185" visible="true" weight="0.22206506" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.27864215" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Python Console" order="7" weight="0.3281471" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32909605" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32956153" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5019815" side_tool="true" visible="true" weight="0.22206506" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+    </layout-to-restore>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Refactor in order to first dump BV to CSV file" />
+    <MESSAGE value="CSV dumping - no threading support" />
+    <MESSAGE value="added support for relationships" />
+    <MESSAGE value="- Fixed various bugs in CSV dumping&#10;- support the neo4j import csv tool" />
+    <MESSAGE value="- Major improvements to performance" />
+    <MESSAGE value="- Fixed some parsing bugs with Branch relationships&#10;- Fixed a collision between Var and Expression object labels" />
+    <MESSAGE value="- Fixed some bugs with variable parsing" />
+    <MESSAGE value="- Testing parallelism" />
+    <MESSAGE value="- Massive performance improvements&#10;- Refactor UUID_Generator class to use internal neo4j apoc procedure&#10;- Addressed multi-threading locking issues when competing for the same relationship nodes for insertions" />
+    <MESSAGE value="- Fixed handling of Transient Error and lock" />
+    <MESSAGE value="- Fixed some problems with BasicBlock branching&#10;- Added a Configuration file&#10;- Added comments to the code&#10;- Added plugin.json" />
+    <MESSAGE value="- Fixed an issue with MLIL_SET_VAR not being cached correctly" />
+    <MESSAGE value="- Version 1.0&#10;- Fixed a major issue with relationship creation within the DB" />
+    <MESSAGE value="- Version 1.1&#10;- Added &quot;Data&quot; nodes, currently supporting Constant nodes that are pointers to strings&#10;- Fixed a problem with correctly identifying Constant nodes&#10;- Started adding support for Diaphora implementation" />
+    <MESSAGE value="- Version 1.2&#10;- Refactor project structure&#10;- Added CSV Post Processing capabilities:&#10;    * Data Symbols and String pointers&#10;- Added Function call relationships (call instruction pointing to the called function)" />
+    <MESSAGE value="- Added Def\Use chains" />
+    <MESSAGE value="- Added initial support for Type enrichment, using clang pre-processor on a header file" />
+    <MESSAGE value="- working on integrating type data from a parsed header into the &#10;  binary view automatically" />
+    <MESSAGE value="- Complete refactor of the header parsing module:&#10;   * now uses neo4j bolt driver instead of py2neo&#10;   * extreme performance improvement&#10;- Working on defining the type definition tree for a    given type" />
+    <MESSAGE value="- refactor header processing module" />
+    <MESSAGE value="- bug fixes on node handlers" />
+    <MESSAGE value="- Added feature: define all known function in a binary view with full type information" />
+    <MESSAGE value="- Major bug fixes in the way BasicBlocks were parsed" />
+    <MESSAGE value="- A function call expression will not have sub expression representing the argument list for that function call" />
+    <MESSAGE value="- Work on Flow Analysis module" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Work on Flow Analysis module" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Modules/DiaphoraImplementation/DiaFuncView.py</url>
+          <line>64</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <condition expression="args['type_name'] == 'lconv' and cursor.extent.end.file.name == 'c:\\WinHeaders\\Unified/locale.h'" language="Python" />
+          <url>file://$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing_OLD_DO_NOT_USE.py</url>
+          <line>294</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py</url>
+          <line>680</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <condition expression="args['TypeName'] == 'PTOP_LEVEL_EXCEPTION_FILTER'" language="Python" />
+          <url>file://$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py</url>
+          <line>375</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py</url>
+          <line>86</line>
+          <option name="timeStamp" value="46" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="nodes_cache" language="Python" />
+        <watch expression="relationships_cache" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="breakpointCondition">
+      <expression>
+        <expression-string>instr_object.HASH == '8b4de5a9dc288f03'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['TypeName'] == 'PTOP_LEVEL_EXCEPTION_FILTER'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['TypeName'] == 'ExceptionRecord'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['TypeName'] == '_EXCEPTION_POINTERS'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['TypeName'] == 'JOBOBJECT_IO_ATTRIBUTION_CONTROL_FLAGS'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['TypeName'] == 'ULONG'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>not kwargs.get('TypeName')</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['type_name'] == 'lconv' and cursor.extent.end.file.name == 'c:\\WinHeaders\\Unified/locale.h'</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['type_name'] == 'lconv' and cursor.extent.end.file.name == ''</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>args['type_name'] == 'lconv' and cursor.extent</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="watch">
+      <expression>
+        <expression-string>relationships_cache</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>nodes_cache</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>field.is_abstract_record()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>field.is_abstract_record</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>dir(field)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(cursor.type.get_fields())</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(cursor.get_children())</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>list(cursor.get_fields())</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>cursor.get_children()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>dir(cursor)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>cursor.get_fields()</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Modules/MLIL_Function_Similarity/UseDefChainsImplementation.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" column="21" lean-forward="true" selection-start-line="4" selection-start-column="21" selection-end-line="4" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/OneDrive/Research Projects/FireEye outputs/Malwares/Scripts/VirusTotal2.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$USER_HOME$/OneDrive/Research Projects/FireEye outputs/Malwares/Scripts/VirusTotal.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" column="85" selection-start-line="4" selection-start-column="85" selection-end-line="4" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="111" selection-start-line="2" selection-start-column="111" selection-end-line="2" selection-end-column="111" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/DiaphoraImplementation/Heuristics/SimpleHashSimilarities.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" column="56" selection-start-line="13" selection-start-column="56" selection-end-line="13" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/String.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="41" selection-start-line="41" selection-end-line="43" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Function.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="39" column="37" lean-forward="true" selection-start-line="39" selection-start-column="37" selection-end-line="39" selection-end-column="37" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Constant.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-7">
+          <caret line="36" column="31" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Neo4j_Processing/PostProcessing.py" />
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Variable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="8" column="14" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/Common/UUID_Generator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="651">
+          <caret line="31" column="25" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="37" column="38" selection-start-line="37" selection-start-column="29" selection-end-line="37" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/site-packages/py2neo/internal/connectors.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="287" selection-start-line="287" selection-end-line="287" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/ssl.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="140">
+          <caret line="910" selection-start-line="910" selection-end-line="910" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/codecs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="479">
+          <caret line="323" selection-start-line="323" selection-end-line="323" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/multiprocessing/spawn.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="116" selection-start-line="116" selection-end-line="116" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/site-packages/neobolt/direct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="471" selection-start-line="471" selection-end-line="471" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/Common/GraphNodeInformation.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TypeSystem/LibraryFunctionCorrelation/NodeHandlers_OLD_DO_NOT_USE.py" />
+    <entry file="file://$PROJECT_DIR$/TypeSystem/HeaderParsing/HeaderFileParsing_OLD_DO_NOT_USE.py" />
+    <entry file="file://$PROJECT_DIR$/TypeSystem/LibraryFunctionCorrelation/CorrelateLibraryFunctionInfo.py" />
+    <entry file="file://$PROJECT_DIR$/plugin.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" column="19" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/DiaphoraImplementation/DiaFuncView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="149">
+          <caret line="9" column="4" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/site-packages/clang/cindex.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="38577">
+          <caret line="1842" column="20" selection-start-line="1842" selection-start-column="8" selection-end-line="1842" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Python37/Lib/site-packages/py2neo/database.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8862">
+          <caret line="435" column="8" selection-start-line="435" selection-start-column="8" selection-end-line="435" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TypeSystem/TypeEnrichment/__init__.py" />
+    <entry file="file://C:/Program Files/Python37/Lib/site-packages/neo4j/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="522" column="8" selection-start-line="522" selection-start-column="8" selection-end-line="522" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Expression.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="17" column="26" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="8" column="17" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Instruction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/CallSite.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="471">
+          <caret line="29" selection-start-line="29" selection-end-line="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-420">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/UseDef.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="609">
+          <caret line="29" lean-forward="true" selection-start-line="29" selection-end-line="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FunctionArgumentAliasing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="20" selection-start-line="20" selection-end-line="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Configuration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="7" column="47" selection-start-line="7" selection-start-column="47" selection-end-line="7" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Binja_Header_Define.gif">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/Common/Neo4jConnector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/TypeInference/IntraProceduralInference.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="14" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/TypeInference/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="1" column="21" lean-forward="true" selection-start-line="1" selection-start-column="21" selection-end-line="1" selection-end-column="21" />
+          <folding>
+            <element signature="e#91#129#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/MLIL_Function_Similarity/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="1" column="18" selection-start-line="1" selection-start-column="8" selection-end-line="1" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
+          <folding>
+            <element signature="e#102#222#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+          <folding>
+            <element signature="e#0#42#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1155">
+          <caret line="55" column="56" selection-start-line="55" selection-start-column="46" selection-end-line="55" selection-end-column="56" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/TypeSystem/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+          <folding>
+            <element signature="e#0#26#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="7" column="7" lean-forward="true" selection-start-line="7" selection-start-column="7" selection-end-line="7" selection-end-column="7" />
+          <folding>
+            <element signature="e#114#145#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/Common/ContextManagement.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="28">
+          <caret line="10" column="59" selection-start-line="10" selection-start-column="59" selection-end-line="10" selection-end-column="59" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="16" lean-forward="true" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
