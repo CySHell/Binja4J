@@ -1,5 +1,5 @@
 from neo4j import GraphDatabase
-import Configuration
+from .. import Configuration
 from .UseDefChainsImplementation import *
 
 

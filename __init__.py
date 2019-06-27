@@ -2,20 +2,18 @@
 This module exports a binary ninja MLIL binary view of a file into a neo4j graph.
 """
 
-from neo4j import GraphDatabase
+from .Core.Common import Neo4jConnector
 import time
 from binaryninja import *
-from .CSV_Processing import BuildCSV
-from .Common import UUID_Generator
-from . import Configuration
-from .TypeSystem.LibraryFunctionCorrelation import NodeHandlers
+from .Core.CSV_Processing import BuildCSV
+from .Core.Common import UUID_Generator
+from .Core.TypeSystem.LibraryFunctionCorrelation import NodeHandlers
 
 
 def export_bv(bv):
     start_time = time.time()
 
-    driver = GraphDatabase.driver(Configuration.analysis_database_uri,
-                                  auth=(Configuration.analysis_database_user, Configuration.analysis_database_password))
+    driver = Neo4jConnector.get_driver()
 
     uuid_obj = UUID_Generator.UUID(driver)
 
