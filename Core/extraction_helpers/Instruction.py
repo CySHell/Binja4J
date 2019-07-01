@@ -14,12 +14,14 @@ class Neo4jInstruction:
         self.HASH = self.instr_hash()
         self.operands = str(instr.operands)
         self.context = context
-        self.parent_instruction_uuid = context.RootInstruction
-        if self.parent_instruction_uuid:
-            self.relationship_label = 'NextInstruction'
-        else:
+        if self.instr.instr_index == 0:
             self.relationship_label = 'InstructionChain'
             self.parent_instruction_uuid = context.RootBasicBlock
+        else:
+            self.relationship_label = 'NextInstruction'
+            self.parent_instruction_uuid = context.RootInstruction
+
+
 
     def instr_hash(self):
         instruction_hash = xxhash.xxh64()

@@ -12,7 +12,7 @@ class Neo4jExpression:
                  operand_index: int):
         self.UUID = uuid
         self.operands = str(expression.operands)
-        self.parent_expression = context.RootExpression
+        self.parent_expression = context.RootExpression if context.RootExpression else context.RootInstruction
         self.op_name = expression.operation.name
         self.op_type = str(expression.ILOperations[expression.operation])
         self.operand_index = operand_index

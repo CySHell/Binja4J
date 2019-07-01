@@ -12,12 +12,12 @@ class CSVPostProcessor:
     string_cache = dict()
     symbol_cache = dict()
 
-    def __init__(self, bv, CSV_Serializer, uuid_generator, cache):
+    def __init__(self, bv, CSV_Serializer, uuid_generator):
         self.CSV_Serializer = CSV_Serializer
         self.bv = bv
         self.binaryView_node_UUID = list(self.CSV_Serializer.csv_dict_row_iterator('BinaryView'))[0]['UUID']
         self.uuid_generator = uuid_generator
-        self.cache = cache
+
 
     def run_all(self):
         self.add_strings()

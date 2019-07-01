@@ -1,74 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cc7abb9e-42f1-431e-812b-5cb009ee7577" name="Default Changelist" comment="- Work on Flow Analysis module">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Binja_Header_Define.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Common/ContextManagement.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Common/GraphNodeInformation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Common/UUID_Generator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/Common/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/TypeSystem/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/CallSite.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Constant.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Function.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/String.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/UseDef.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/Variable.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Core/extraction_helpers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Modules/TypeInference/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Lib/tcl8.6/init.tcl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/Activate.ps1" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_asyncio.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_bz2.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_ctypes.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_ctypes_test.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_decimal.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_distutils_findvs.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_elementtree.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_hashlib.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_lzma.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_msi.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_multiprocessing.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_overlapped.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_socket.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_sqlite3.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_ssl.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testbuffer.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testcapi.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testconsole.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testimportmultiple.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_testmultiphase.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/_tkinter.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/activate" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/activate.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/deactivate.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/pyexpat.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/python.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/python3.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/python36.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/pythonw.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/select.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/sqlite3.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/tcl86t.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/tk86t.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/unicodedata.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/vcruntime140.dll" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/Scripts/winsound.pyd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/venv/pyvenv.cfg" afterDir="false" />
+    <list default="true" id="cc7abb9e-42f1-431e-812b-5cb009ee7577" name="Default Changelist" comment="- refactor context - now a unique context object is created for each graph object during creation&#10;- fixed a bug in the context system">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/Configuration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -79,10 +19,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py">
+        <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+            <state relative-caret-position="1340">
+              <caret line="317" selection-start-line="317" selection-end-line="317" />
             </state>
           </provider>
         </entry>
@@ -169,16 +109,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="e6b697bd9dc75c74d2c1391cc6bc4fdeccfddd0b" />
       </map>
     </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Modules/BasicBlockNormalization/Main.py" />
-        <option value="$PROJECT_DIR$/Modules/UseDefChain-Relationship Creator/CreateUseDefChains.py" />
-        <option value="$PROJECT_DIR$/Modules/UseDefChain-Relationship Creator/Main.py" />
         <option value="$PROJECT_DIR$/Modules/UseDefChain-Relationship Creator/UseDefChainsImplementation.py" />
         <option value="$PROJECT_DIR$/Modules/MLIL_Function_Similarity/Entities/Function.py" />
         <option value="$PROJECT_DIR$/Modules/DiaphoraImplementation/DiaFunc.py" />
@@ -210,7 +147,6 @@
         <option value="$PROJECT_DIR$/extraction_helpers/BasicBlock.py" />
         <option value="$PROJECT_DIR$/Neo4j_Processing/ExportNeo4j.py" />
         <option value="$PROJECT_DIR$/extraction_helpers/Symbol.py" />
-        <option value="$PROJECT_DIR$/Configuration.py" />
         <option value="$PROJECT_DIR$/extraction_helpers/CallSite.py" />
         <option value="$PROJECT_DIR$/CSV_Processing/BuildCSV.py" />
         <option value="$PROJECT_DIR$/extraction_helpers/UseDef.py" />
@@ -221,19 +157,23 @@
         <option value="$PROJECT_DIR$/Modules/DiaphoraImplementation/DiaFuncView.py" />
         <option value="$PROJECT_DIR$/Core/Common/Neo4jConnector.py" />
         <option value="$PROJECT_DIR$/Modules/TypeInference/IntraProceduralInference.py" />
-        <option value="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" />
-        <option value="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" />
         <option value="$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py" />
         <option value="$PROJECT_DIR$/Core/TypeSystem/LibraryFunctionCorrelation/NodeHandlers.py" />
         <option value="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" />
         <option value="$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py" />
+        <option value="$PROJECT_DIR$/Configuration.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" />
+        <option value="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" />
+        <option value="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="width" value="924" />
-    <option name="height" value="1034" />
+    <option name="x" value="-10" />
+    <option name="width" value="925" />
+    <option name="height" value="1035" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -257,7 +197,7 @@
               <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
               <item name="Binary Ninja - BV2Neo4j" type="462c0819:PsiDirectoryNode" />
               <item name="Core" type="462c0819:PsiDirectoryNode" />
-              <item name="Common" type="462c0819:PsiDirectoryNode" />
+              <item name="CSV_Processing" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Binary Ninja - BV2Neo4j" type="b2602c69:ProjectViewProjectNode" />
@@ -416,11 +356,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.ExportNeo4j (1)" />
-        <item itemvalue="Python.ExportNeo4j" />
+        <item itemvalue="Python.NodeHandlers" />
         <item itemvalue="Python.HeaderFileParsing (1)" />
         <item itemvalue="Python.HeaderFileParsing" />
-        <item itemvalue="Python.NodeHandlers" />
+        <item itemvalue="Python.ExportNeo4j (1)" />
+        <item itemvalue="Python.ExportNeo4j" />
       </list>
     </recent_temporary>
   </component>
@@ -646,20 +586,20 @@
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15455747" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17239101" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4980185" weight="0.3281471" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4953765" weight="0.38755304" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49405548" weight="0.35077792" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.51343703" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32956153" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.3281471" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.3281471" />
-      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.4993395" visible="true" weight="0.15275814" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5006605" side_tool="true" visible="true" weight="0.15275814" />
+      <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49867898" visible="true" weight="0.16831683" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5059445" side_tool="true" weight="0.24752475" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32956153" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -686,7 +626,6 @@
     </layout-to-restore>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Refactor in order to first dump BV to CSV file" />
     <MESSAGE value="CSV dumping - no threading support" />
     <MESSAGE value="added support for relationships" />
     <MESSAGE value="- Fixed various bugs in CSV dumping&#10;- support the neo4j import csv tool" />
@@ -711,7 +650,8 @@
     <MESSAGE value="- Major bug fixes in the way BasicBlocks were parsed" />
     <MESSAGE value="- A function call expression will not have sub expression representing the argument list for that function call" />
     <MESSAGE value="- Work on Flow Analysis module" />
-    <option name="LAST_COMMIT_MESSAGE" value="- Work on Flow Analysis module" />
+    <MESSAGE value="- refactor context - now a unique context object is created for each graph object during creation&#10;- fixed a bug in the context system" />
+    <option name="LAST_COMMIT_MESSAGE" value="- refactor context - now a unique context object is created for each graph object during creation&#10;- fixed a bug in the context system" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -737,11 +677,6 @@
           <url>file://$PROJECT_DIR$/Core/TypeSystem/HeaderParsing/HeaderFileParsing.py</url>
           <line>375</line>
           <option name="timeStamp" value="44" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="46" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -1035,30 +970,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Expression.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="336">
-          <caret line="17" column="26" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="147">
           <caret line="8" column="17" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Instruction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="26" selection-start-line="26" selection-end-line="26" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1069,16 +984,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-420">
-          <caret line="26" selection-start-line="26" selection-end-line="26" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/UseDef.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="609">
@@ -1086,20 +991,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FunctionArgumentAliasing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Configuration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="7" column="47" selection-start-line="7" selection-start-column="47" selection-end-line="7" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FunctionArgumentAliasing.py" />
     <entry file="file://$PROJECT_DIR$/Binja_Header_Define.gif">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -1143,38 +1035,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
-          <folding>
-            <element signature="e#102#222#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
-          <folding>
-            <element signature="e#0#42#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1155">
-          <caret line="55" column="56" selection-start-line="55" selection-start-column="46" selection-end-line="55" selection-end-column="56" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Core/TypeSystem/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
@@ -1206,17 +1068,78 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="42">
-          <caret line="2" column="16" lean-forward="true" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Configuration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="119" selection-start-line="2" selection-start-column="119" selection-end-line="2" selection-end-column="119" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="14" column="24" lean-forward="true" selection-start-line="14" selection-start-column="24" selection-end-line="14" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Instruction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="22" selection-start-line="22" selection-end-line="22" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Expression.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="546">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1134">
+          <caret line="55" column="56" selection-start-line="55" selection-start-column="46" selection-end-line="55" selection-end-column="56" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="16" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1340">
+          <caret line="317" selection-start-line="317" selection-end-line="317" />
         </state>
       </provider>
     </entry>
