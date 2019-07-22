@@ -8,13 +8,12 @@ import xxhash
 
 class Neo4jFunction:
 
-    def __init__(self, mlil_func, uuid: str, context):
-        self.UUID = uuid
+    def __init__(self, mlil_func, context):
         self.func = mlil_func
         self.source_function = self.func.source_function
         self.bv = self.source_function.view
-        self.HASH = self.func_hash()
         self.context = context
+        self.context.set_hash(self.func_hash())
 
     def func_hash(self):
         function_hash = xxhash.xxh64()
@@ -28,29 +27,30 @@ class Neo4jFunction:
         return function_hash.hexdigest()
 
     def serialize(self):
+
         csv_template = {
             'mandatory_node_dict': {
-                'UUID': self.UUID,
-                'HASH': self.HASH,
+                'HASH': self.context.SelfHASH,
                 'LABEL': 'Function',
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.context.RootBinaryView,
-                'END_ID': self.UUID,
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
                 'TYPE': 'MemberFunc',
                 'StartNodeLabel': 'BinaryView',
                 'EndNodeLabel': 'Function',
-                'Name': self.func.source_function.name,
+                'Name': str(self.func.source_function.name),
                 'Offset': self.source_function.start,
             },
 
-            'mandatory_context_dict': vars(self.context),
+            'mandatory_context_dict': self.context.get_context(),
 
             'node_attributes': {
                 'ClobberedRegisters': self.func.source_function.clobbered_regs,
                 'CallingConvention': self.func.source_function.calling_convention.name,
             },
             'relationship_attributes': {
+
             },
         }
         return csv_template

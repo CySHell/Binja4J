@@ -4,6 +4,7 @@ import threading
 import csv
 import time
 import Configuration
+import xxhash
 
 driver = GraphDatabase.driver(Configuration.analysis_database_uri,
                               auth=(Configuration.analysis_database_user, Configuration.analysis_database_password),
@@ -14,20 +15,14 @@ driver = GraphDatabase.driver(Configuration.analysis_database_uri,
 def create_constraints():
     with driver.session() as session:
         session.run("CREATE CONSTRAINT ON (bv:BinaryView) ASSERT bv.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (bv:BinaryView) ASSERT bv.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (func:Function) ASSERT func.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (func:Function) ASSERT func.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (bb:BasicBlock) ASSERT bb.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (bb:BasicBlock) ASSERT bb.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (instr:Instruction) ASSERT instr.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (instr:Instruction) ASSERT instr.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (ex:Expression) ASSERT ex.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (ex:Expression) ASSERT ex.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (var:Variable) ASSERT var.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (var:Variable) ASSERT var.UUID IS UNIQUE;")
         session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.HASH IS UNIQUE;")
-        session.run("CREATE CONSTRAINT ON (const:Constant) ASSERT const.UUID IS UNIQUE;")
-        session.sync()
+        session.run("CREATE CONSTRAINT ON (string:String) ASSERT string.HASH IS UNIQUE;")
+        session.run("CREATE CONSTRAINT ON (progsym:Symbol) ASSERT progsym.HASH IS UNIQUE;")
 
 
 def create_nodes(filename):
@@ -36,18 +31,16 @@ def create_nodes(filename):
         print('Now Processing: ', filename)
         session.run("USING PERIODIC COMMIT 1000 "
                     "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
-                                                               "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
-                                                               "SET node.UUID = row.UUID "
-                                                               "RETURN true "
+                    "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
+                    "RETURN true "
                     )
-        session.sync()
 
 
 def create_relationships(filename):
     print('Now Processing: ', filename)
-    batch_rows = [[] for _ in range(Configuration.THREAD_COUNT)]
+    batch_rows = [list() for _ in range(Configuration.THREAD_COUNT)]
     batch_index = 0
-    thread_list = []
+    thread_list = list()
     with open(Configuration.analysis_database_path + filename, 'r') as fn:
         for row in csv.DictReader(fn):
             batch_rows[batch_index].append(row)
@@ -56,7 +49,7 @@ def create_relationships(filename):
                 thread_list.append(
                     threading.Thread(target=create_batch_relationships, args=[batch_rows[batch_index]]))
                 thread_list[-1].start()
-                batch_rows[batch_index] = []
+                batch_rows[batch_index] = list()
 
             batch_index = (batch_index + 1) % Configuration.THREAD_COUNT
 
@@ -84,15 +77,13 @@ def create_batch_relationships(batch_rows):
                 # through each row and commit it as a single transaction
                 # TODO: figure out how to do this more efficiently
                 for row in batch_rows:
-                    session.run("MATCH (start:" + row['StartNodeLabel'] + " {UUID: $start_id}) "
+                    session.run("MATCH (start:" + row['StartNodeLabel'] + " {HASH: $start_id}) "
                                                                           "MATCH (end:" + row[
-                                    'EndNodeLabel'] + " {UUID: $end_id}) "
+                                    'EndNodeLabel'] + " {HASH: $end_id}) "
                                                       "CALL apoc.merge.relationship(start, $row_type,"
-                                                      " {START_ID: start.UUID, "
-                                                      "END_ID: end.UUID, TYPE: $row_type}, $row, end) yield rel "
+                                                      " {ContextHash: $context_hash}, $row, end) yield rel "
                                                       "RETURN true ", start_id=row['START_ID'], end_id=row['END_ID'],
-                                row_type=row['TYPE'],
-                                row=row)
+                                row_type=row['TYPE'], context_hash=row['ContextHash'], row=row)
 
                 return
             except exceptions.TransientError:
@@ -102,7 +93,8 @@ def create_batch_relationships(batch_rows):
             except exceptions.ServiceUnavailable:
                 time.sleep(2)
                 continue
-
+            except TypeError as e:
+                print("TypeError: ", e)
         print("Exceeded retry count for committing relationships")
         session.sync()
 

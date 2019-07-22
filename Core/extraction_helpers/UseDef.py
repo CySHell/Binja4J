@@ -7,9 +7,7 @@ from binaryninja import *
 
 class Neo4jUseDef:
 
-    def __init__(self, variable_node_uuid, instruction_node_uuid, context, type: str):
-        self.variable_uuid = variable_node_uuid
-        self.instruction_uuid = instruction_node_uuid
+    def __init__(self, context, type: str):
         self.context = context
         self.type = type
 
@@ -19,14 +17,14 @@ class Neo4jUseDef:
                 # stub, this class represents only a relationship
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.variable_uuid,
-                'END_ID': self.instruction_uuid,
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
                 'TYPE': self.type,
                 'StartNodeLabel': 'Variable',
                 'EndNodeLabel': 'Instruction',
             },
 
-            'mandatory_context_dict': vars(self.context),
+            'mandatory_context_dict': self.context.get_context(),
 
             'node_attributes': {
                 # stub, this class represents only a relationship

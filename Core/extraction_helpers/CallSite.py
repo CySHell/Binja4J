@@ -8,9 +8,7 @@ import xxhash
 
 class Neo4jCallSite:
 
-    def __init__(self, callsite_instruction_node_uuid, called_function_node_uuid, context):
-        self.callsite_instruction_node_uuid = callsite_instruction_node_uuid
-        self.called_function_node_uuid = called_function_node_uuid
+    def __init__(self, context):
         self.context = context
 
     def serialize(self):
@@ -19,14 +17,14 @@ class Neo4jCallSite:
                 # stub, this class represents only a relationship
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.callsite_instruction_node_uuid,
-                'END_ID': self.called_function_node_uuid,
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
                 'TYPE': 'FunctionCall',
                 'StartNodeLabel': 'Instruction',
                 'EndNodeLabel': 'Function',
             },
 
-            'mandatory_context_dict': vars(self.context),
+            'mandatory_context_dict': self.context.get_context(),
 
             'node_attributes': {
                 # stub, this class represents only a relationship

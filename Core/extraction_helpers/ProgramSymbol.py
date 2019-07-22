@@ -8,13 +8,11 @@ import xxhash
 
 class Neo4jSymbol:
 
-    def __init__(self, symbol, uuid: str, parent_node_uuid: str, parent_node_type: str, binaryViewUUID: str):
+    def __init__(self, raw_symbol,  context, parent_node_type='Constant'):
 
-        self.UUID = uuid
-        self.binaryViewUUID = binaryViewUUID
-        self.symbol = symbol
-        self.HASH = self.symbol_hash()
-        self.parent_node_uuid = parent_node_uuid
+        self.symbol = raw_symbol
+        self.context = context
+        self.context.set_hash(self.symbol_hash())
         self.parent_node_type = parent_node_type
 
     def symbol_hash(self):
@@ -26,28 +24,24 @@ class Neo4jSymbol:
     def serialize(self):
         csv_template = {
             'mandatory_node_dict': {
-                'HASH': self.HASH,
-                'UUID': self.UUID,
+                'HASH': self.context.SelfHASH,
                 'LABEL': 'Symbol',
-            },
-            'mandatory_relationship_dict': {
-                'START_ID': self.parent_node_uuid,
-                'END_ID': self.UUID,
-                'TYPE': 'SymbolRef',
-                'StartNodeLabel': self.parent_node_type,
-                'EndNodeLabel': 'Symbol',
-                'BinaryViewUUID': self.binaryViewUUID,
-            },
-
-            'mandatory_context_dict': {
-
-            },
-
-            'node_attributes': {
                 'SymbolName': self.symbol.raw_name,
                 'SymbolTypeEnum': self.symbol.type.value,
                 'SymbolType': self.symbol.type.name,
                 'SymbolNameSpace': self.symbol.namespace,
+            },
+            'mandatory_relationship_dict': {
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
+                'TYPE': 'SymbolRef',
+                'StartNodeLabel': self.parent_node_type,
+                'EndNodeLabel': 'Symbol',
+            },
+
+            'mandatory_context_dict': self.context.get_context(),
+
+            'node_attributes': {
             },
             'relationship_attributes': {
                 'SymbolOrdinal': self.symbol.ordinal,

@@ -8,20 +8,17 @@ import xxhash
 
 class Neo4jInstruction:
 
-    def __init__(self, instr, uuid: int, context):
-        self.UUID = uuid
+    def __init__(self, instr: mediumlevelil.MediumLevelILInstruction, context):
         self.instr = instr
-        self.HASH = self.instr_hash()
         self.operands = str(instr.operands)
         self.context = context
+
         if self.instr.instr_index == 0:
             self.relationship_label = 'InstructionChain'
-            self.parent_instruction_uuid = context.RootBasicBlock
         else:
             self.relationship_label = 'NextInstruction'
-            self.parent_instruction_uuid = context.RootInstruction
 
-
+        self.context.set_hash(self.instr_hash())
 
     def instr_hash(self):
         instruction_hash = xxhash.xxh64()
@@ -32,19 +29,19 @@ class Neo4jInstruction:
     def serialize(self):
         csv_template = {
             'mandatory_node_dict': {
-                'UUID': self.UUID,
-                'HASH': self.HASH,
+                'HASH': self.context.SelfHASH,
                 'LABEL': 'Instruction',
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.parent_instruction_uuid,
-                'END_ID': self.UUID,
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
                 'TYPE': self.relationship_label,
                 'StartNodeLabel': 'BasicBlock' if self.relationship_label is 'InstructionChain' else 'Instruction',
                 'EndNodeLabel': 'Instruction',
+                'AssemblyOffset': self.instr.address,
             },
 
-            'mandatory_context_dict': vars(self.context),
+            'mandatory_context_dict': self.context.get_context(),
 
             'node_attributes': {
             },

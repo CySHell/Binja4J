@@ -8,43 +8,37 @@ import xxhash
 
 class Neo4jString:
 
-    def __init__(self, raw_string, uuid: str, parent_node_uuid: str, parent_node_type: str, binaryViewUUID: str):
+    def __init__(self, raw_string, context, parent_node_type='Constant'):
 
-        self.UUID = uuid
-        self.binaryViewUUID = binaryViewUUID
         self.raw_string = raw_string
-        self.HASH = self.string_hash()
-        self.parent_node_uuid = parent_node_uuid
+        self.context = context
+        self.context.set_hash(self.string_hash())
         self.parent_node_type = parent_node_type
 
     def string_hash(self):
         string_hash = xxhash.xxh64()
-        string_hash.update(self.raw_string)
+        string_hash.update(str(self.raw_string).strip())
 
         return string_hash.hexdigest()
 
     def serialize(self):
         csv_template = {
             'mandatory_node_dict': {
-                'HASH': self.HASH,
-                'UUID': self.UUID,
+                'HASH': self.context.SelfHASH,
                 'LABEL': 'String',
+                'RawString': str(self.raw_string).strip(),
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.parent_node_uuid,
-                'END_ID': self.UUID,
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
                 'TYPE': 'StringRef',
                 'StartNodeLabel': self.parent_node_type,
                 'EndNodeLabel': 'String',
-                'BinaryViewUUID': self.binaryViewUUID,
             },
 
-            'mandatory_context_dict': {
-
-            },
+            'mandatory_context_dict': self.context.get_context(),
 
             'node_attributes': {
-                'RawString': str(self.raw_string).strip(),
             },
             'relationship_attributes': {
 

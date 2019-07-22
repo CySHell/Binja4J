@@ -8,13 +8,11 @@ import xxhash
 
 class Neo4jConstant:
 
-    def __init__(self, constant, uuid, operand_index: int, context):
-        self.UUID = uuid
+    def __init__(self, constant, operand_index: int, context):
         self.constant = constant
         self.operand_index = operand_index
-        self.parent_expr_uuid = context.RootExpression
-        self.HASH = self.constant_hash()
         self.context = context
+        self.context.set_hash(self.constant_hash())
 
     def constant_hash(self):
         constant_hash = xxhash.xxh64()
@@ -23,29 +21,28 @@ class Neo4jConstant:
         return constant_hash.hexdigest()
 
     def serialize(self):
+
         csv_template = {
             'mandatory_node_dict': {
-                'HASH': self.HASH,
-                'UUID': self.UUID,
+                'HASH': self.context.SelfHASH,
                 'LABEL': 'Constant',
                 'ConstantValue': self.constant,
             },
             'mandatory_relationship_dict': {
-                'START_ID': self.parent_expr_uuid,
-                'END_ID': self.UUID,
+                'START_ID': self.context.ParentHASH,
+                'END_ID': self.context.SelfHASH,
                 'TYPE': 'ConstantOperand',
                 'StartNodeLabel': 'Expression',
                 'EndNodeLabel': 'Constant',
             },
 
-            'mandatory_context_dict': vars(self.context),
+            'mandatory_context_dict': self.context.get_context(),
 
             'node_attributes': {
                 'ConstType': type(self.constant)
 
             },
             'relationship_attributes': {
-                'OperandIndex': self.operand_index,
             },
         }
 

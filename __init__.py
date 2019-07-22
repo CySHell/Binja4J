@@ -15,9 +15,7 @@ def export_bv(bv):
 
     driver = Neo4jConnector.get_driver()
 
-    uuid_obj = UUID_Generator.UUID(driver)
-
-    binja_graph = BuildCSV.BinjaGraph(driver, uuid_obj, bv)
+    binja_graph = BuildCSV.BinjaGraph(driver, bv)
 
     binja_graph.bv_extract()
 
