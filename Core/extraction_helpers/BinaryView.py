@@ -18,7 +18,6 @@ class Neo4jBinaryView:
         self.bv = bv
         self.context = ContextManagement.Context()
         self.context.set_hash(self.bv_hash())
-        self.context.set_uuid("BV" + self.context.SelfHASH)
         self.context.set_parent_hash('0')
 
     def bv_hash(self):

@@ -2,32 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cc7abb9e-42f1-431e-812b-5cb009ee7577" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Core/CSV_Processing/UUIDPropagation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Modules/FlowAnalysis/IntraProcedural/ExecPath.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Modules/FlowAnalysis/IntraProcedural/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Modules/FlowAnalysis/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/Configuration.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Common/ContextManagement.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Common/ContextManagement.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Common/Neo4jConnector.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Common/Neo4jConnector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/Common/UUID_Generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Common/UUID_Generator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/CallSite.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/CallSite.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Constant.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Constant.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Function.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Function.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/String.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/String.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/UseDef.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/UseDef.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/extraction_helpers/Variable.py" beforeDir="false" afterPath="$PROJECT_DIR$/Core/extraction_helpers/Variable.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Modules/TypeInference/FlowAnalysis/VarBackSlice.py" beforeDir="false" afterPath="$PROJECT_DIR$/Modules/FlowAnalysis/IntraProcedural/VarUseDef.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -40,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5896">
-              <caret line="366" column="30" selection-start-line="366" selection-start-column="30" selection-end-line="366" selection-end-column="30" />
+            <state relative-caret-position="80">
+              <caret line="67" lean-forward="true" selection-start-line="67" selection-end-line="67" />
               <folding>
                 <element signature="e#102#251#0" expanded="true" />
               </folding>
@@ -50,19 +32,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/Common/ContextManagement.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1255">
-              <caret line="63" lean-forward="true" selection-start-line="63" selection-end-line="63" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="98" column="25" selection-start-line="98" selection-start-column="25" selection-end-line="98" selection-end-column="25" />
+            <state relative-caret-position="217">
+              <caret line="78" column="28" selection-start-line="78" selection-start-column="22" selection-end-line="78" selection-end-column="28" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
               </folding>
@@ -71,22 +44,43 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/UseDef.py">
+        <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Instruction.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+            <state relative-caret-position="189">
+              <caret line="39" column="50" selection-start-line="39" selection-start-column="50" selection-end-line="39" selection-end-column="50" />
+              <folding>
+                <element signature="e#0#25#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Variable.py">
+        <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/CallSite.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="10" column="26" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="26" />
+            <state relative-caret-position="399">
+              <caret line="26" column="50" selection-start-line="26" selection-start-column="43" selection-end-line="26" selection-end-column="50" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="312">
+              <caret line="33" column="70" selection-start-line="33" selection-start-column="70" selection-end-line="33" selection-end-column="70" />
               <folding>
-                <element signature="e#0#25#0" expanded="true" />
+                <element signature="e#0#43#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Core/Common/ContextManagement.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1050">
+              <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
             </state>
           </provider>
         </entry>
@@ -126,12 +120,12 @@
       <find>func</find>
       <find>&quot;BV&quot;</find>
       <find>'BV'</find>
-      <find>print(</find>
       <find>:X}</find>
       <find>self.object_cache</find>
       <find>UUID</find>
-      <find>uuid</find>
       <find>&quot;uuid&quot;</find>
+      <find>uuid</find>
+      <find>print(</find>
     </findStrings>
     <replaceStrings>
       <replace>''</replace>
@@ -215,22 +209,22 @@
         <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/Core/Common/UUID_Generator.py" />
         <option value="$PROJECT_DIR$/Core/CSV_Processing/UUIDPropagation.py" />
-        <option value="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" />
-        <option value="$PROJECT_DIR$/Configuration.py" />
         <option value="$PROJECT_DIR$/Core/CSV_Processing/CSV_Helper.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py" />
-        <option value="$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/CallSite.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/Constant.py" />
-        <option value="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/Function.py" />
-        <option value="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/ProgramSymbol.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/String.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/UseDef.py" />
         <option value="$PROJECT_DIR$/Core/extraction_helpers/Variable.py" />
         <option value="$PROJECT_DIR$/Core/Common/ContextManagement.py" />
-        <option value="$PROJECT_DIR$/Core/extraction_helpers/UseDef.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py" />
+        <option value="$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py" />
         <option value="$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/Expression.py" />
+        <option value="$PROJECT_DIR$/Configuration.py" />
+        <option value="$PROJECT_DIR$/Core/extraction_helpers/Instruction.py" />
         <option value="$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py" />
       </list>
     </option>
@@ -676,7 +670,14 @@
       <option name="project" value="LOCAL" />
       <updated>1561975152164</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="- Complete refactor of the Context object&#10;- Major code coverage improvements">
+      <created>1563799196183</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1563799196183</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TodoView">
@@ -690,14 +691,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17701453" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17701453" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4980185" weight="0.3281471" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49405548" visible="true" weight="0.0990099" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49339497" weight="0.8118812" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.5685997" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -705,7 +705,7 @@
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.3281471" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.3281471" />
       <window_info anchor="bottom" id="Version Control" order="9" sideWeight="0.49867898" weight="0.16831683" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5059445" side_tool="true" weight="0.24752475" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.506605" side_tool="true" weight="0.48797736" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32956153" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -733,7 +733,6 @@
     </layout-to-restore>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="CSV dumping - no threading support" />
     <MESSAGE value="added support for relationships" />
     <MESSAGE value="- Fixed various bugs in CSV dumping&#10;- support the neo4j import csv tool" />
     <MESSAGE value="- Major improvements to performance" />
@@ -758,7 +757,8 @@
     <MESSAGE value="- A function call expression will not have sub expression representing the argument list for that function call" />
     <MESSAGE value="- Work on Flow Analysis module" />
     <MESSAGE value="- refactor context - now a unique context object is created for each graph object during creation&#10;- fixed a bug in the context system" />
-    <option name="LAST_COMMIT_MESSAGE" value="- refactor context - now a unique context object is created for each graph object during creation&#10;- fixed a bug in the context system" />
+    <MESSAGE value="- Complete refactor of the Context object&#10;- Major code coverage improvements" />
+    <option name="LAST_COMMIT_MESSAGE" value="- Complete refactor of the Context object&#10;- Major code coverage improvements" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1100,84 +1100,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-95">
-          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
-          <folding>
-            <element signature="e#0#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Configuration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BasicBlock.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="415">
           <caret line="53" column="64" selection-start-line="53" selection-start-column="38" selection-end-line="53" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="57" column="64" selection-start-line="57" selection-start-column="38" selection-end-line="57" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/CallSite.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="26" column="50" selection-start-line="26" selection-start-column="43" selection-end-line="26" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Constant.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="38" column="64" selection-start-line="38" selection-start-column="64" selection-end-line="38" selection-end-column="64" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Expression.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="32" column="36" selection-start-line="32" selection-start-column="29" selection-end-line="32" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Function.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="37">
-          <caret line="32" column="36" selection-start-line="32" selection-start-column="29" selection-end-line="32" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Instruction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="89">
-          <caret line="28" column="24" selection-start-line="28" selection-start-column="24" selection-end-line="28" selection-end-column="24" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
           </folding>
@@ -1211,10 +1137,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/BinaryView.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="215">
+          <caret line="20" selection-start-line="20" selection-end-line="20" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Variable.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="10" column="26" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="26" />
+        <state relative-caret-position="473">
+          <caret line="40" column="64" selection-start-line="40" selection-start-column="64" selection-end-line="40" selection-end-column="64" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
           </folding>
@@ -1223,32 +1159,96 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/UseDef.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        <state relative-caret-position="105">
+          <caret line="11" column="17" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="17" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py">
+    <entry file="file://$PROJECT_DIR$/Core/Neo4j_Processing/ExportNeo4j.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="98" column="25" selection-start-line="98" selection-start-column="25" selection-end-line="98" selection-end-column="25" />
+        <state relative-caret-position="312">
+          <caret line="33" column="70" selection-start-line="33" selection-start-column="70" selection-end-line="33" selection-end-column="70" />
           <folding>
-            <element signature="e#0#38#0" expanded="true" />
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Function.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="226">
+          <caret line="35" column="40" selection-start-line="35" selection-start-column="13" selection-end-line="35" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Core/Common/ContextManagement.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1255">
-          <caret line="63" lean-forward="true" selection-start-line="63" selection-end-line="63" />
+        <state relative-caret-position="1050">
+          <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Expression.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="63">
+          <caret line="27" column="8" lean-forward="true" selection-start-line="27" selection-start-column="8" selection-end-line="27" selection-end-column="8" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Constant.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="436">
+          <caret line="38" column="64" selection-start-line="38" selection-start-column="64" selection-end-line="38" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/CallSite.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="26" column="50" selection-start-line="26" selection-start-column="43" selection-end-line="26" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Configuration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="139" selection-start-line="2" selection-start-column="139" selection-end-line="2" selection-end-column="139" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/extraction_helpers/Instruction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="39" column="50" selection-start-line="39" selection-start-column="50" selection-end-line="39" selection-end-column="50" />
+          <folding>
+            <element signature="e#0#25#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/PostProcessing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="217">
+          <caret line="78" column="28" selection-start-line="78" selection-start-column="22" selection-end-line="78" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Core/CSV_Processing/BuildCSV.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5896">
-          <caret line="366" column="30" selection-start-line="366" selection-start-column="30" selection-end-line="366" selection-end-column="30" />
+        <state relative-caret-position="80">
+          <caret line="67" lean-forward="true" selection-start-line="67" selection-end-line="67" />
           <folding>
             <element signature="e#102#251#0" expanded="true" />
           </folding>

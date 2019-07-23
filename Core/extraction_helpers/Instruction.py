@@ -8,12 +8,13 @@ import xxhash
 
 class Neo4jInstruction:
 
-    def __init__(self, instr: mediumlevelil.MediumLevelILInstruction, context):
+    def __init__(self, instr: mediumlevelil.MediumLevelILInstruction, context, parent_type: str):
         self.instr = instr
+        self.parent_type = parent_type
         self.operands = str(instr.operands)
         self.context = context
 
-        if self.instr.instr_index == 0:
+        if self.parent_type == 'BasicBlock':
             self.relationship_label = 'InstructionChain'
         else:
             self.relationship_label = 'NextInstruction'
@@ -36,7 +37,7 @@ class Neo4jInstruction:
                 'START_ID': self.context.ParentHASH,
                 'END_ID': self.context.SelfHASH,
                 'TYPE': self.relationship_label,
-                'StartNodeLabel': 'BasicBlock' if self.relationship_label is 'InstructionChain' else 'Instruction',
+                'StartNodeLabel': self.parent_type,
                 'EndNodeLabel': 'Instruction',
                 'AssemblyOffset': self.instr.address,
             },

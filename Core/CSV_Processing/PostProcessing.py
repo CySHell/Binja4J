@@ -37,12 +37,12 @@ class CSVPostProcessor:
         for row in next_instruction_relationship_iterator:
             # The cache uses the function uuid appended by the instruction index to speedup the search process
             function_instruction_index_to_instruction_hash.update({
-                row['RootFunction'] + row['InstructionIndex']: row['END_ID']
+                row['RootFunction'] + row['RootBasicBlock'] + row['InstructionIndex']: row['END_ID']
             })
         for row in instruction_chain_relationship_iterator:
             # The cache uses the function uuid appended by the instruction index to speedup the search process
             function_instruction_index_to_instruction_hash.update({
-                row['RootFunction'] + row['InstructionIndex']: row['END_ID']
+                row['RootFunction'] + row['RootBasicBlock'] + row['InstructionIndex']: row['END_ID']
             })
 
         # Iterate all variables and find the mlil_instruction index of their def\use
@@ -51,14 +51,13 @@ class CSVPostProcessor:
                                                 row['RootInstruction'], row['RootExpression'])
 
             usedef_context.set_parent_hash(row['END_ID'])
-            usedef_context.set_uuid(row['SelfUUID'] + 'UD')
 
             variable_definition_instruction_index_list = row['VariableDefinedAtIndex'].split(',')
             variable_use_instruction_index_list = row['VariableUsedAtIndex'].split(',')
 
             for instruction_index in variable_definition_instruction_index_list:
                 instruction_hash = function_instruction_index_to_instruction_hash.get(
-                    row['RootFunction'] + instruction_index.strip())
+                    row['RootFunction'] + row['RootBasicBlock'] + instruction_index.strip())
 
                 if instruction_hash:
                     usedef_context.set_hash(instruction_hash)
@@ -76,11 +75,12 @@ class CSVPostProcessor:
                             }
                         )
                 else:
-                    print("Failed to locate definition of variable: ", row['END_ID'])
+                    pass
+                    # print("Failed to locate definition of variable: ", row['END_ID'])
 
             for instruction_index in variable_use_instruction_index_list:
                 instruction_hash = function_instruction_index_to_instruction_hash.get(
-                    row['RootFunction'] + instruction_index.strip())
+                    row['RootFunction'] + row['RootBasicBlock'] + instruction_index.strip())
 
                 if instruction_hash:
                     usedef_context.set_hash(instruction_hash)

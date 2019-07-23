@@ -104,7 +104,7 @@ def BinaryViewExists():
         fname = '\'file:/BinaryView-nodes.csv\''
         return session.run("LOAD CSV WITH HEADERS FROM " + fname + "AS row "
                                                                    "MATCH (bv:BinaryView {HASH: row.HASH}) "
-                                                                   "RETURN exists(bv.UUID) "
+                                                                   "RETURN exists(bv.HASH) "
                            ).peek()
 
 
@@ -126,7 +126,8 @@ def GraphCleanup():
 
     with driver.session() as session:
         session.run("LOAD CSV WITH HEADERS FROM " + fname + "AS row "
-                                                            "MATCH (n)-[rel {RootBinaryView: row.UUID}]->() " + cypher_expression)
+                                                            "MATCH (n)-[rel {RootBinaryView: row.HASH}]->() "
+                                                            + cypher_expression)
         session.sync()
 
 

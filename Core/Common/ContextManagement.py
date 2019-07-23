@@ -12,18 +12,17 @@ class Context:
     # the same node object is used to represent the object.
     # TODO: expand this class to add more context related information, such as memory version etc
 
-    def __init__(self, binaryview_uuid=None, function_uuid=None, basicblock_uuid=None, instruction_uuid=None,
-                 expression_uuid=None, operand_index=None):
-        self.RootBinaryView = binaryview_uuid or str()
-        self.RootFunction = function_uuid or str()
-        self.RootBasicBlock = basicblock_uuid or str()
-        self.RootInstruction = instruction_uuid or str()
-        self.RootExpression = expression_uuid or str()
+    def __init__(self, binaryview_hash=None, function_hash=None, basicblock_hash=None, instruction_hash=None,
+                 expression_hash=None, operand_index=None):
+        self.RootBinaryView = binaryview_hash or str()
+        self.RootFunction = function_hash or str()
+        self.RootBasicBlock = basicblock_hash or str()
+        self.RootInstruction = instruction_hash or str()
+        self.RootExpression = expression_hash or str()
         self.OperandIndex = str(operand_index) or str()
         self.SelfHASH = str()
         self.ParentHASH = str()
         self.ContextHash = str()
-        self.SelfUUID = str()
 
     def __repr__(self):
         return ("RootBinaryView: " + str(self.RootBinaryView) + "\n" +
@@ -33,13 +32,9 @@ class Context:
                 "RootExpression: " + str(self.RootExpression) + "\n" +
                 "SelfHASH: " + str(self.SelfHASH) + "\n" +
                 "ParentHASH: " + str(self.ParentHASH) + "\n" +
-                "SelfUUID: " + str(self.SelfUUID) + "\n" +
                 "OperandIndex" + str(self.OperandIndex) + "\n" +
                 "*" * 30
                 )
-
-    def set_uuid(self, uuid):
-        self.SelfUUID = uuid
 
     def set_hash(self, hash):
         self.SelfHASH = hash
@@ -55,8 +50,8 @@ class Context:
         hash.update(self.RootBasicBlock)
         hash.update(self.RootInstruction)
         hash.update(self.RootExpression)
-        hash.update(self.SelfUUID)
         hash.update(self.ParentHASH)
+        hash.update(self.SelfHASH)
 
         self.ContextHash = hash.hexdigest()
 

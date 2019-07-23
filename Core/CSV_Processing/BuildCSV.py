@@ -13,6 +13,7 @@ from ..Common import ContextManagement
 
 import time
 
+
 class BinjaGraph:
     #   The BinjaGraph object holds the export_bv functionality of the whole plugin:
     #   1. Traverse the BinaryView and map all the objects to several CSV files
@@ -35,6 +36,7 @@ class BinjaGraph:
             'BinaryView': dict(), 'Function': dict(), 'BasicBlock': dict(),
             'Instruction': dict(), 'Expression': dict(), 'Variable': dict(),
             'Constant': dict(), 'String': dict(), 'ProgramSymbol': dict(),
+            'CallSite': dict(),
         }
         )
 
@@ -95,8 +97,7 @@ class BinjaGraph:
         """
 
         # Create the context for this function
-        function_context = ContextManagement.Context(bv_object.context.SelfUUID)
-        function_context.set_uuid(f'{bv_object.context.SelfUUID}' + 'F' + f'{(func.start - func.view.start):x}')
+        function_context = ContextManagement.Context(bv_object.context.SelfHASH)
 
         func_object = Function.Neo4jFunction(func.mlil, function_context)
         function_context.set_parent_hash(bv_object.context.SelfHASH)
@@ -150,8 +151,9 @@ class BinjaGraph:
         """
 
         basic_block_context = ContextManagement.Context(parent_context.RootBinaryView,
-                                                        parent_context.RootFunction or parent_context.SelfUUID)
-        basic_block_context.set_uuid(basic_block_context.RootFunction + 'B' + f'{basic_block.index :x}')
+                                                        # If parent node is a function it will not have a RootFunction,
+                                                        # otherwise if its a basicblock then it does have RootFunction.
+                                                        parent_context.RootFunction or parent_context.SelfHASH)
         basic_block_context.set_parent_hash(parent_node_hash)
         bb_object = BasicBlock.Neo4jBasicBlock(basic_block, branch_condition, basic_block_context)
 
@@ -169,8 +171,10 @@ class BinjaGraph:
 
         # build the RootInstruction chain under the BB
         parent_node_hash = basic_block_context.SelfHASH
+        p_node_type = 'BasicBlock'
         for instruction in basic_block:
-            parent_node_hash = self.instruction_extract(instruction, basic_block_context, parent_node_hash)
+            parent_node_hash = self.instruction_extract(instruction, basic_block_context, parent_node_hash, p_node_type)
+            p_node_type = 'Instruction'
 
         outgoing_edges_list = []
         # Iterate all branches of the current basic block and create them
@@ -187,7 +191,6 @@ class BinjaGraph:
                 # just create the relationship between the two existing basic blocks, no new node additions
                 back_edge_context = ContextManagement.Context(basic_block_context.RootBinaryView,
                                                               basic_block_context.RootFunction)
-                back_edge_context.set_uuid(basic_block_context.RootFunction + 'B' + f'{branch.target.index:x}')
                 back_edge_context.set_parent_hash(basic_block_context.SelfHASH)
 
                 back_edge_object = BasicBlock.Neo4jBasicBlock(branch.target, branch.type.value, back_edge_context,
@@ -196,7 +199,8 @@ class BinjaGraph:
 
         return outgoing_edges_list, bb_object
 
-    def instruction_extract(self, instruction, basic_block_context: ContextManagement.Context, parent_node_hash):
+    def instruction_extract(self, instruction, basic_block_context: ContextManagement.Context, parent_node_hash,
+                            parent_node_type):
         """
         :param instruction: BinaryNinja MLIL Instruction object
         :param basic_block_context
@@ -206,11 +210,11 @@ class BinjaGraph:
 
         instruction_context = ContextManagement.Context(basic_block_context.RootBinaryView,
                                                         basic_block_context.RootFunction,
-                                                        basic_block_context.SelfUUID
+                                                        basic_block_context.SelfHASH
                                                         )
-        instruction_context.set_uuid(instruction_context.RootBasicBlock + 'I' + f'{instruction.instr_index :x}')
+
         instruction_context.set_parent_hash(parent_node_hash)
-        instr_object = Instruction.Neo4jInstruction(instruction, instruction_context)
+        instr_object = Instruction.Neo4jInstruction(instruction, instruction_context, parent_node_type)
 
         if instruction_context.SelfHASH in self.object_cache['Instruction']:
             if self.context_hash_cache.get(instruction_context.context_hash()):
@@ -246,21 +250,18 @@ class BinjaGraph:
             parent_context.RootFunction,
             parent_context.RootBasicBlock,
             # If the parent is an instruction then RootInstruction is empty,
-            # just use the instruction SelfUUID instead
-            parent_context.RootInstruction if parent_node_type == 'Expression' else parent_context.SelfUUID,
+            # just use the instruction SelfHASH instead
+            parent_context.RootInstruction if parent_node_type == 'Expression' else parent_context.SelfHASH,
             parent_context.RootExpression,
             operand_index,
         )
 
-        expression_context.set_uuid(parent_context.SelfUUID + 'E' + str(operand_index))
-
         if parent_node_type == 'Expression':
-            expression_context.RootExpression = parent_context.SelfUUID
+            expression_context.RootExpression = parent_context.SelfHASH
 
         expression_context.set_parent_hash(parent_context.SelfHASH)
 
-        expr_object = Expression.Neo4jExpression(instruction, expression_context, parent_node_type,
-                                                 operand_index)
+        expr_object = Expression.Neo4jExpression(instruction, expression_context, parent_node_type)
 
         if expression_context.SelfHASH in self.object_cache['Expression']:
             if self.context_hash_cache.get(expression_context.context_hash()):
@@ -351,10 +352,10 @@ class BinjaGraph:
                                                      context.RootBasicBlock, context.RootInstruction,
                                                      # If the parent is a root expression (as opposed to a
                                                      # sub-expression) then RootExpression is empty.
-                                                     # just use the instruction SelfUUID instead.
-                                                     context.RootExpression or context.SelfUUID,
+                                                     # just use the instruction SelfHASH instead.
+                                                     context.RootExpression or context.SelfHASH,
                                                      index)
-        variable_context.set_uuid(variable_context.RootExpression + 'V' + f'{index:x}')
+
         variable_context.set_parent_hash(context.SelfHASH)
 
         var_object = Variable.Neo4jVar(var, index, variable_context)
@@ -380,19 +381,21 @@ class BinjaGraph:
                                                      context.RootBasicBlock, context.RootInstruction,
                                                      # If the parent is a root expression (as opposed to a
                                                      # sub-expression) then RootExpression is empty.
-                                                     # just use the instruction SelfUUID instead.
-                                                     context.RootExpression or context.SelfUUID,
+                                                     # just use the instruction SelfHASH instead.
+                                                     context.RootExpression or context.SelfHASH,
                                                      index)
 
-        constant_context.set_uuid(constant_context.RootExpression + 'C' + f'{index:x}')
         constant_context.set_parent_hash(context.SelfHASH)
 
         const_object = Constant.Neo4jConstant(constant, index, constant_context)
 
         if constant_context.SelfHASH in self.object_cache['Constant']:
-            # Expression object already exists in the cache, only create the relationship (not the node itself)
-            # and connect it with the existing node, then continue analysis of the Expression contents
-            self.update_object_cache('Constant', const_object, False, True)
+            if self.context_hash_cache.get(constant_context.context_hash()):
+                return
+            else:
+                # Expression object already exists in the cache, only create the relationship (not the node itself)
+                # and connect it with the existing node, then continue analysis of the Expression contents
+                self.update_object_cache('Constant', const_object, False, True)
         else:
             self.update_object_cache('Constant', const_object, True, True)
 
@@ -410,13 +413,16 @@ class BinjaGraph:
         string_context = ContextManagement.Context(context.RootBinaryView, context.RootFunction,
                                                    context.RootBasicBlock, context.RootInstruction,
                                                    context.RootExpression)
-        string_context.set_uuid(context.SelfUUID + 'ST')
+
         string_context.set_parent_hash(context.SelfHASH)
 
         string_object = String.Neo4jString(raw_string, string_context)
 
         if string_context.SelfHASH in self.object_cache['String']:
-            self.update_object_cache('String', string_object, False, True)
+            if self.context_hash_cache.get(string_context.context_hash()):
+                return
+            else:
+                self.update_object_cache('String', string_object, False, True)
         else:
             self.update_object_cache('String', string_object, True, True)
 
@@ -424,13 +430,16 @@ class BinjaGraph:
         symbol_context = ContextManagement.Context(context.RootBinaryView, context.RootFunction,
                                                    context.RootBasicBlock, context.RootInstruction,
                                                    context.RootExpression)
-        symbol_context.set_uuid(context.SelfUUID + 'SY')
+
         symbol_context.set_parent_hash(context.SelfHASH)
 
         symbol_object = ProgramSymbol.Neo4jSymbol(raw_symbol, symbol_context)
 
         if symbol_context.SelfHASH in self.object_cache['ProgramSymbol']:
-            self.update_object_cache('ProgramSymbol', symbol_object, False, True)
+            if self.context_hash_cache.get(symbol_context.context_hash()):
+                return
+            else:
+                self.update_object_cache('ProgramSymbol', symbol_object, False, True)
         else:
             self.update_object_cache('ProgramSymbol', symbol_object, True, True)
 
@@ -444,59 +453,72 @@ class BinjaGraph:
             {'Attributes': object_attributes, 'WriteNode': write_node, 'WriteRelationship': write_relationship})
 
         self.context_hash_cache.update({
-                                        object_attributes['mandatory_context_dict']['ContextHash']: True
-                                       }
-                                       )
+            object_attributes['mandatory_context_dict']['ContextHash']: True
+        }
+        )
 
     def def_function_calls(self):
-        # instr_addr_to_context structure:
-        # {
-        #   instruction_address: instruction_context
-        # }
-        instr_addr_to_context = dict()
 
-        # function_address_to_hash_cache structure:
-        # {
-        #   function_hash: function_address
-        # }
-        function_address_to_hash_cache = dict()
+        function_offset_to_hash_cache = dict()
+        expr_hash_to_first_argument_expr = dict()
+        expr_hash_to_function_pointer = dict()
 
-        for instr_hash in self.object_cache['Instruction'].values():
-            for instr_entity in instr_hash:
-                instr_addr_to_context.update(
-                    {
-                    instr_entity['Attributes']['mandatory_relationship_dict']['AssemblyOffset']:
-                          instr_entity['Attributes']['mandatory_context_dict']
-                    }
-                )
+        for func in self.object_cache['Function'].values():
+            for func_entity in func:
+                func_offset = func_entity['Attributes']['mandatory_relationship_dict']['Offset']
+                func_hash = func_entity['Attributes']['mandatory_context_dict']['SelfHASH']
+                function_offset_to_hash_cache.update({
+                    func_offset: func_hash
+                })
 
-        for func_hash in self.object_cache['Function'].values():
-            for func_entity in func_hash:
-                function_address_to_hash_cache.update(
-                    {
-                        func_entity['Attributes']['mandatory_relationship_dict']['Offset']:
-                            func_entity['Attributes']['mandatory_relationship_dict']['END_ID']
-                    }
-                )
+        for expr in self.object_cache['Expression'].values():
+            for expr_entity in expr:
+                if expr_entity['Attributes']['mandatory_context_dict']['OperandIndex'] == '1':
+                    # We are only interested in the first argument of the call instruction
+                    expr_hash = expr_entity['Attributes']['mandatory_context_dict']['SelfHASH']
+                    parent_expr_hash = expr_entity['Attributes']['mandatory_context_dict']['ParentHASH']
+                    expr_hash_to_first_argument_expr.update({
+                        parent_expr_hash: expr_hash
+                    })
 
-        for func in self.bv.functions:
-            if len(func.mlil.basic_blocks) >= Configuration.MIN_MLIL_BASIC_BLOCKS:
-                code_references = self.bv.get_code_refs(func.start)
-                for call_instruction_address in [instr.address for instr in code_references]:
-                    mlil_call_instruction_address = func.mlil.get_instruction_start(call_instruction_address)
-                    call_instruction_context = instr_addr_to_context.get(mlil_call_instruction_address)
+        for const in self.object_cache['Constant'].values():
+            for const_entity in const:
+                const_value = const_entity['Attributes']['mandatory_node_dict']['ConstantValue']
+                parent_expr_hash = const_entity['Attributes']['mandatory_context_dict']['ParentHASH']
+                expr_hash_to_function_pointer.update({
+                    parent_expr_hash: const_value
+                })
 
-                    if call_instruction_context:
-                        call_site_context = ContextManagement.Context(call_instruction_context['RootBinaryView'],
-                                                                      call_instruction_context['RootFunction'],
-                                                                      call_instruction_context['RootBasicBlock'])
-                        call_site_context.set_parent_hash(function_address_to_hash_cache[str(func.start)])
-                        call_site_context.set_hash(call_instruction_context['SelfHash'])
-                        call_site_context.set_uuid(call_instruction_context['SelfUUID'])
-                        call_site_object = CallSite.Neo4jCallSite(call_instruction_context)
+        for expr in self.object_cache['Expression'].values():
+            for expr_entity in expr:
+                if expr_entity['Attributes']['mandatory_node_dict']['OperationName'] == 'MLIL_CALL' or 'MLIL_TAILCALL':
+                    first_argument_expr_hash = expr_hash_to_first_argument_expr.get(
+                        expr_entity['Attributes']['mandatory_context_dict']['SelfHASH']
+                    )
+                    if first_argument_expr_hash:
+                        function_offset = expr_hash_to_function_pointer.get(first_argument_expr_hash)
+                        if function_offset:
+                            function_hash = function_offset_to_hash_cache.get(function_offset)
+                            if function_hash:
+                                context_dict = expr_entity['Attributes']['mandatory_context_dict']
+                                # Create the context of the call_site (same as the instruction context)
+                                call_site_context = ContextManagement.Context(context_dict['RootBinaryView'],
+                                                                              context_dict['RootFunction'],
+                                                                              context_dict['RootBasicBlock'],
+                                                                              context_dict['RootInstruction'])
+                                call_site_context.set_parent_hash(call_site_context.RootInstruction)
+                                call_site_context.set_hash(function_hash)
 
-                        self.update_object_cache('CallSite', call_site_object, False, True)
+                                # Create the call_site_object and update the object_cache
+                                call_site_object = CallSite.Neo4jCallSite(call_site_context)
+                                self.update_object_cache('CallSite', call_site_object, False, True)
+                            else:
+                                pass
+                                # print("Failed to locate function hash for function offset: ", function_offset)
+                        else:
+                            pass
+                            # print("Failed to locate function offset in expr hash: ", first_argument_expr_hash)
                     else:
-                        print("Failed to locate context for: ")
-                        print("MLIL call instruction: ", mlil_call_instruction_address)
-                        print("Assembly call instruction: ", call_instruction_address)
+                        pass
+                        # print("Failed to locate the first argument expression for expr hash: ",
+                        #      expr_entity['Attributes']['mandatory_context_dict']['SelfHASH'])

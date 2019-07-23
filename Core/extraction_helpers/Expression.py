@@ -8,13 +8,11 @@ import xxhash
 
 class Neo4jExpression:
 
-    def __init__(self, expression, context, parent_node_type: str,
-                 operand_index: int):
+    def __init__(self, expression, context, parent_node_type: str):
 
         self.operands = str(expression.operands)
         self.op_name = expression.operation.name
         self.op_type = str(expression.ILOperations[expression.operation])
-        self.operand_index = operand_index
         self.parent_node_type = parent_node_type
         self.operation_enum = expression.operation.value
         self.context = context
