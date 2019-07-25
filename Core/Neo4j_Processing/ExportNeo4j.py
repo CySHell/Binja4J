@@ -31,10 +31,10 @@ def create_nodes(filename):
         print('Now Processing: ', filename)
         session.run("USING PERIODIC COMMIT 1000 "
                     "LOAD CSV WITH HEADERS FROM " + filename + "AS row "
-                    "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
-                    "RETURN true "
+                                                               "CALL apoc.merge.node([row['LABEL']], {HASH: row['HASH']}, row) yield node "
+                                                               "RETURN true "
                     )
-
+        session.close()
 
 def create_relationships(filename):
     print('Now Processing: ', filename)
@@ -65,6 +65,34 @@ def create_relationships(filename):
 
         for thread in thread_list:
             thread.join()
+
+
+def test_create_relationships(filename):
+    with driver.session() as session:
+        with open(Configuration.analysis_database_path + filename, 'r') as fn:
+            sample_row = next(csv.DictReader(fn))
+
+        filename = '\"file:/' + filename + '\" '
+        print('Now Processing: ', filename)
+
+        if sample_row:
+            cypher_query = "call apoc.periodic.iterate("
+            cypher_query += "'CALL apoc.load.csv(" + filename + ", {header: true}) yield map as row ' , "
+            cypher_query += "'CALL apoc.search.nodeAll({" + sample_row['StartNodeLabel'] + ": \"HASH\"}, \"exact\", " \
+                                                                                  "row.START_ID) yield node as start "
+            cypher_query += "CALL apoc.search.nodeAll({" + sample_row['EndNodeLabel'] + ": \"HASH\"}, \"exact\", " \
+                                                                                  "row.END_ID) yield node as end "
+            cypher_query += "CALL apoc.merge.relationship(start, row.TYPE, {ContextHash: row.ContextHash}, row, end) " \
+                            "yield rel " \
+                            "RETURN true ', " \
+                            "{concurrency: 200, batchSize: 5, iterateList:true, retries: 1000, parallel:true})"
+            result = session.run(cypher_query)
+            for record in result:
+                print(record)
+                print("*" * 30)
+
+        else:
+            print("Failed to load csv file: ", filename)
 
 
 def create_batch_relationships(batch_rows):
@@ -127,7 +155,7 @@ def GraphCleanup():
     with driver.session() as session:
         session.run("LOAD CSV WITH HEADERS FROM " + fname + "AS row "
                                                             "MATCH (n)-[rel {RootBinaryView: row.HASH}]->() "
-                                                            + cypher_expression)
+                    + cypher_expression)
         session.sync()
 
 
@@ -148,7 +176,7 @@ if __name__ == "__main__":
         for root, dirs, files in os.walk(Configuration.analysis_database_path):
             for filename in files:
                 if filename.endswith('-relationships.csv'):
-                    create_relationships(filename)
+                    test_create_relationships(filename)
     else:
         print("BinaryView already exists in DB, skipping export.")
 
