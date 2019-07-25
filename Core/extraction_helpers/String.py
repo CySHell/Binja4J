@@ -8,9 +8,9 @@ import xxhash
 
 class Neo4jString:
 
-    def __init__(self, raw_string, context, parent_node_type='Constant'):
+    def __init__(self, raw_string: str, context, parent_node_type='Constant'):
 
-        self.raw_string = raw_string
+        self.raw_string = self.sanitize_string(raw_string)
         self.context = context
         self.context.set_hash(self.string_hash())
         self.parent_node_type = parent_node_type
@@ -20,6 +20,11 @@ class Neo4jString:
         string_hash.update(str(self.raw_string).strip())
 
         return string_hash.hexdigest()
+
+    def sanitize_string(self, raw_string):
+        # Switch all quotation marks (' and ") with their ascii equivalent (%#%).
+        # This is mainly done because neo4j can't parse complicated strings with many quotation marks.
+        return raw_string.replace('"', '%34%').replace("'", "%39%")
 
     def serialize(self):
         csv_template = {
